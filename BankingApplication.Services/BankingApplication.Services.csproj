@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>C:\Users\hp\Source\Repos\BankingApplication\BankingApplication\Backup1\</UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BankingApplication.Models\BankingApplication.Models.csproj" />
+  </ItemGroup>
+</Project>
