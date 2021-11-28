@@ -1,48 +1,55 @@
 ﻿using BankingApplication.Services;
 using System;
 using BankingApplication.Models;
-using System.Collections.Generic;
 
 namespace BankingApplication.CLI
 {
 
     class Program
     {
-
+        private static AccountHolderPage accountHolderPage;
+        private static BankEmployeePage employeePage;
         public static void Main()
         {
-            IDataProvider dataProvider = new JsonFileHelper();
-            RBIStorage.banks = dataProvider.GetData<Bank>();
+            RBIStorage.banks = JsonFileHelper.GetData<Bank>(Constant.filePath);
+            Program p = new Program();
+            p.InitializeUI();
+        }
+
+        private void InitializeUI()
+        {
+            accountHolderPage = new AccountHolderPage();
+            employeePage = new BankEmployeePage();
             WelcomeMenu();
         }
 
-        public static void WelcomeMenu()
+        public void WelcomeMenu()
         {
-            AccountHolderPage accountHolderPage = new AccountHolderPage();
-            BankEmployeePage employeePage = new BankEmployeePage();
+
             Console.WriteLine(Constant.welcomeMessage);
-            while (true)
+            try
             {
-                try
+                switch (GetMainMenuByInput(UserInput.GetIntegerInput("choice")))
                 {
-                    switch (GetMainMenuByInput(Convert.ToInt32(Console.ReadLine())))
-                    {
-                        case MainMenu.AccountHolder:
-                            accountHolderPage.CustomerInterface();
-                            break;
-                        case MainMenu.BankEmployee:
-                            employeePage.EmployeeInterface();
-                            break;
-                        case MainMenu.None:
-                            Environment.Exit(0);
-                            break;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
+                    case MainMenu.AccountHolder:
+                        accountHolderPage.CustomerInterface();
+                        WelcomeMenu();
+                        break;
+                    case MainMenu.BankEmployee:
+                        employeePage.EmployeeInterface();
+                        WelcomeMenu();
+                        break;
+                    case MainMenu.None:
+                        Environment.Exit(0);
+                        break;
                 }
             }
+
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
         }
         public static MainMenu GetMainMenuByInput(int value)
         {
@@ -56,6 +63,4 @@ namespace BankingApplication.CLI
 
 
     }
-
-
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using BankingApplication.Models;
@@ -8,40 +9,108 @@ namespace BankingApplication.Services
 {
     public class BankService : IBankService
     {
-        IAccountService accountService = new AccountService();
-        IDataProvider dataProvider = new JsonFileHelper();
+        private IAccountService accountService = null;
+        public BankService(IAccountService accService)
+        {
+            accountService = Factory.CreateAccountService();
+        }
         public Bank CreateAndGetBank(string name, string branch, string ifsc)
         {
             Bank newBank = new Bank(name, branch, ifsc);
-            RBIStorage.banks.Add(newBank);
-            return newBank;
-        }
-
-        public bool IsValidEmployee(string userName, string password)
-        {
-            foreach (var bank in RBIStorage.banks)
+            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
             {
-                Employee employee = bank.Employees.FirstOrDefault(e => (e.UserName.EqualInvariant(userName)) && (e.Password.Equals(password)));
-                if (employee != null)
+                conn.Open();
+                SqlCommand createBankCommand = new SqlCommand("insert into bank values(@bankid,@name,@branch,@ifsc,@defualtcurrency)",conn);
+                createBankCommand.Parameters.Add("@bankid",SqlDbType.VarChar).Value = newBank.BankId;
+                createBankCommand.Parameters.Add("@name", SqlDbType.VarChar).Value = newBank.BankName;
+                createBankCommand.Parameters.Add("@branch", SqlDbType.VarChar).Value = newBank.Branch;
+                createBankCommand.Parameters.Add("@ifsc", SqlDbType.VarChar).Value = newBank.Ifsc;
+                createBankCommand.Parameters.Add("@defualtcurrency", SqlDbType.VarChar).Value = newBank.DefaultCurrency.Name;
+                if(createBankCommand.ExecuteNonQuery()!=-1)
                 {
-                    SessionContext.Bank = bank;
-                    SessionContext.Employee = employee;
-                    return true;
+                    return newBank;
+                }
+                else
+                {
+                    return null;
                 }
             }
-            return false;
+        }
+        public Employee CreateAndGetEmployee(string name, int age, DateTime dob, Gender gender, EmployeeDesignation role, Bank bank)
+        {
+            Employee employee = new Employee(name, age, dob, gender, role, bank);
+            bank.Employees.Add(employee);
+            JsonFileHelper.WriteData(RBIStorage.banks);
+            return employee;
+        }
+        public bool IsValidEmployee(string userName, string password)
+        {
+            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("select * from Employee where username=@username and password=@password", conn);
+                cmd.Parameters.AddWithValue("@username", userName);
+                cmd.Parameters.AddWithValue("@password", password);
+                SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    PrepareEmployeeSessionContext(reader);
+                    return true;
+                }
+                else
+                    return false;
+
+            }
 
 
         }
-        public void CreateAccount(Account newAccount, Bank bank)
+
+        private void PrepareEmployeeSessionContext(SqlDataReader reader)
+        {
+            Employee emp = new Employee
+            {
+                EmployeeId = reader["employeeId"].ToString(),
+                Name = reader["Name"].ToString(),
+                UserName = reader["username"].ToString(),
+                Password = reader["password"].ToString(),
+                BankId = reader["bankid"].ToString(),
+                Dob = Convert.ToDateTime(reader["dob"].ToString())
+            };
+            SessionContext.Employee = emp;
+        }
+
+        public void CreateAndAddAccount(Account newAccount, Bank bank)
         {
             newAccount.BankId = bank.BankId;
-            newAccount.BankName = bank.BankName;
-            newAccount.Branch = bank.Branch;
-            newAccount.Ifsc = bank.Ifsc;
             newAccount.AccountNumber = GenerateAccountNumber(bank.BankId);
-            bank.Accounts.Add(newAccount);
-            dataProvider.WriteData(RBIStorage.banks);
+            using(SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
+            {
+                conn.Open();
+                SqlCommand createAccountCommand = new SqlCommand($"insert into account values(@accountId,@bankId,@accountNumber,@username,@password,@accountType,@balance,@status)", conn);
+                createAccountCommand.Parameters.Add("@accountId", SqlDbType.VarChar).Value = newAccount.AccountId;
+                createAccountCommand.Parameters.Add("@bankId", SqlDbType.VarChar).Value = newAccount.BankId;
+                createAccountCommand.Parameters.Add("@accountNumber", SqlDbType.VarChar).Value = newAccount.AccountNumber;
+                createAccountCommand.Parameters.Add("@username", SqlDbType.VarChar).Value = newAccount.UserName;
+                createAccountCommand.Parameters.Add("@password", SqlDbType.VarChar).Value = newAccount.Password;
+                createAccountCommand.Parameters.Add("@accountType", SqlDbType.VarChar).Value = newAccount.AccountType;
+                createAccountCommand.Parameters.Add("@balance", SqlDbType.Decimal).Value = newAccount.Balance;
+                createAccountCommand.Parameters.Add("@status", SqlDbType.VarChar).Value = newAccount.Status;
+                if(createAccountCommand.ExecuteNonQuery()!=-1)
+                {
+                    SqlCommand createCustomerCommand = new SqlCommand($"insert into customer values(@customerId,@name,@age,@dob,@contactNumber,@aadharNumber,@panNumber,@address,@accountId)", conn);
+                    createCustomerCommand.Parameters.Add("@customerId", SqlDbType.VarChar).Value = newAccount.AccountId;
+                    createCustomerCommand.Parameters.Add("@name", SqlDbType.VarChar).Value = newAccount.Customer.Name;
+                    createCustomerCommand.Parameters.Add("@age", SqlDbType.Int).Value = newAccount.Customer.Age;
+                    createCustomerCommand.Parameters.Add("@dob", SqlDbType.DateTime).Value = newAccount.Customer.Dob;
+                    createCustomerCommand.Parameters.Add("@contactNumber", SqlDbType.VarChar).Value = newAccount.Customer.ContactNumber;
+                    createCustomerCommand.Parameters.Add("@aadharNumber", SqlDbType.VarChar).Value = newAccount.Customer.AadharNumber;
+                    createCustomerCommand.Parameters.Add("@panNumber", SqlDbType.VarChar).Value = newAccount.Customer.PanNumber;
+                    createCustomerCommand.Parameters.Add("@address", SqlDbType.VarChar).Value = newAccount.Customer.Address;
+                    createCustomerCommand.Parameters.Add("@accountId", SqlDbType.VarChar).Value = newAccount.AccountId;
+                    createCustomerCommand.ExecuteNonQuery();
+
+                }
+            }
         }
         public string GenerateAccountNumber(string bankid)
         {
@@ -54,28 +123,85 @@ namespace BankingApplication.Services
         }
         public Bank GetBankByBankId(string bankId)
         {
-            Bank bank = RBIStorage.banks.FirstOrDefault(b => b.BankId.EqualInvariant(bankId));
-            if (bank != null)
+            using(SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
             {
-                return bank;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("select * from bank where id=@bankid",conn);
+                cmd.Parameters.AddWithValue("bankid", bankId);
+                SqlDataReader reader = cmd.ExecuteReader();
+                if(reader.Read())
+                {
+                    Bank bank = new Bank
+                    {
+                        BankId = reader["id"].ToString(),
+                        BankName = reader["name"].ToString(),
+                        Branch = reader["branch"].ToString(),
+                        Ifsc = reader["ifsc"].ToString()
+                    };
+                    return bank;
+                }
+                return null;
             }
-            else
+        }
+        public List<Transaction> GetTransactionsByDate(DateTime date, Bank bank)
+        {
+            List<Transaction> transactions = new List<Transaction>();
+            foreach (Account account in bank.Accounts)
             {
-                throw new InvalidBankException("Bank Doesnt Exist.");
+                transactions.AddRange(account.Transactions.FindAll(tr => tr.On.Date == date));
             }
+            transactions.AddRange(bank.Transactions.FindAll(tr => tr.On.Date == date));
+            return transactions;
+        }
+        public List<Transaction> GetAccountTransactions(string accountId)
+        {
+            return accountService.GetAccountById(accountId)?.Transactions;
+        }
+        public List<Transaction> GetTransactions(Bank bank)
+        {
+            List<Transaction> transactions = new List<Transaction>();
+            foreach (Account account in bank.Accounts)
+            {
+                transactions.AddRange(account.Transactions);
+            }
+            transactions.AddRange(bank.Transactions);
+            return transactions;
         }
         public bool AddNewCurrency(Bank bank, string newCurrencyName, decimal exchangeRate)
         {
-            if (bank.SupportedCurrency.Any(c => c.CurrencyName.EqualInvariant(newCurrencyName)))
+            if (bank.SupportedCurrency.Any(c => c.Name.EqualInvariant(newCurrencyName)))
             {
                 return false;
             }
             bank.SupportedCurrency.Add(new Currency(newCurrencyName, exchangeRate));
-            dataProvider.WriteData(RBIStorage.banks);
+            JsonFileHelper.WriteData(RBIStorage.banks);
             return true;
         }
+        public void UpdateAccount(Account userAccount)
+        {
+            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
+            {
+                conn.Open();
+                SqlCommand updateCustomer = new SqlCommand("update customer set name=@name,age=@age,dob=@dob,contactNumber=@contactNumber,aadharNumber=@aadharNumber,panNumber=@panNumber,address=@address where accountId=@accountId", conn);
+                updateCustomer.Parameters.Add("@name", SqlDbType.VarChar).Value = userAccount.Customer.Name;
+                updateCustomer.Parameters.Add("@age", SqlDbType.Int).Value = userAccount.Customer.Age;
+                updateCustomer.Parameters.Add("@dob", SqlDbType.DateTime).Value = userAccount.Customer.Dob;
+                updateCustomer.Parameters.Add("@contactNumber", SqlDbType.VarChar).Value = userAccount.Customer.ContactNumber;
+                updateCustomer.Parameters.Add("@aadharNumber", SqlDbType.VarChar).Value = userAccount.Customer.AadharNumber;
+                updateCustomer.Parameters.Add("@panNumber", SqlDbType.VarChar).Value = userAccount.Customer.PanNumber;
+                updateCustomer.Parameters.Add("@address", SqlDbType.VarChar).Value = userAccount.Customer.Address;
+                updateCustomer.Parameters.Add("@accountId", SqlDbType.VarChar).Value = userAccount.Customer.AccountId;
+                updateCustomer.ExecuteNonQuery();
+            }
+        }
 
-        public bool SetServiceCharge(ModeOfTransfer mode, bool isSelfBankCharge, Bank bank, decimal newValue)
+        public bool DeleteAccount(Account userAccount)
+        {
+            userAccount.Status = AccountStatus.Closed;
+            JsonFileHelper.WriteData(RBIStorage.banks);
+            return true;
+        }
+        public bool ModifyServiceCharge(ModeOfTransfer mode, bool isSelfBankCharge, Bank bank, decimal newValue)
         {
             bool isModified;
             if (isSelfBankCharge)
@@ -94,20 +220,18 @@ namespace BankingApplication.Services
             {
                 if (mode == ModeOfTransfer.RTGS)
                 {
-                    bank.OtherRTGS = newValue; isModified = true;
+                    bank.OtherRTGS = newValue; 
                 }
                 else
                 {
-                    bank.OtherIMPS = newValue; isModified = true;
+                    bank.OtherIMPS = newValue;
                 }
+                isModified = true;
             }
-            dataProvider.WriteData(RBIStorage.banks);
+            JsonFileHelper.WriteData(RBIStorage.banks);
             return isModified;
         }
-        public List<Transaction> GetAccountTransactions(string accountId)
-        {
-            return accountService.GetAccountById(accountId)?.Transactions;
-        }
+       
         public bool RevertTransaction(Transaction transaction, Bank bank)
         {
             Account userAccount = accountService.GetAccountById(transaction.SenderAccountId);
@@ -131,17 +255,12 @@ namespace BankingApplication.Services
 
 
             }
-            dataProvider.WriteData(RBIStorage.banks);
+            JsonFileHelper.WriteData(RBIStorage.banks);
             return true;
 
         }
-        public Employee CreateAndGetEmployee(string name, string age, DateTime dob, Gender gender, EmployeeDesignation role, Bank bank)
-        {
-            Employee employee = new Employee(name, age, dob, gender, role, bank);
-            bank.Employees.Add(employee);
-            return employee;
-        }
-        public Bank FetchBankById(string bankid)
+       
+        public Bank GetBankById(string bankid)
         {
             using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
             {
@@ -150,7 +269,7 @@ namespace BankingApplication.Services
                 SqlParameter bankidParameter = new SqlParameter("@bankid", bankid);
                 cmd.Parameters.Add(bankidParameter);
                 SqlDataReader reader = cmd.ExecuteReader();
-                if (reader.HasRows)
+                if (reader.Read())
                 {
                     Bank bank = new Bank
                     {

@@ -8,10 +8,10 @@ namespace BankingApplication.Models
     {
         public Currency(string name, decimal exchangeRate)
         {
-            CurrencyName = name;
+            Name = name;
             ExchangeRate = exchangeRate;
         }
-        public string CurrencyName { get; set; }
+        public string Name { get; set; }
         public decimal ExchangeRate { get; set; }
     }
 }

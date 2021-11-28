@@ -10,8 +10,6 @@ namespace BankingApplication.Services
         bool IsValidCustomer(string userName, string password);
         Account GetAccountByAccNumber(string accNumber);
         Account GetAccountById(string accountId);
-        void UpdateAccount(Account userAccount);
-        bool DeleteAccount(Account userAccount);
         void DepositAmount(Account userAccount, decimal amount, Currency currency);
         void WithdrawAmount(Account userAccount, decimal amount);
         void TransferAmount(Account senderAccount, Bank senderBank, Account receiverAccount, decimal amount, ModeOfTransfer mode);

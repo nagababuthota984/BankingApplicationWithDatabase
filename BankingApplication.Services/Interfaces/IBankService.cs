@@ -9,14 +9,16 @@ namespace BankingApplication.Services
     {
         Bank CreateAndGetBank(string name, string branch, string ifsc);
         bool IsValidEmployee(string userName, string password);
-        void CreateAccount(Account newAccount, Bank bank);
-        string GenerateAccountNumber(string bankid);
-        Bank GetBankByBankId(string bankId);
-        bool AddNewCurrency(Bank bank, string newCurrencyName, decimal exchangeRate);
-        bool SetServiceCharge(ModeOfTransfer mode, bool isSelfBankCharge, Bank bank, decimal newValue);
+        void CreateAndAddAccount(Account newAccount, Bank bank);
+        void UpdateAccount(Account userAccount);
+        bool DeleteAccount(Account userAccount);
+        bool AddNewCurrency(Bank bank, string newName, decimal exchangeRate);
+        bool ModifyServiceCharge(ModeOfTransfer mode, bool isSelfBankCharge, Bank bank, decimal newValue);
         List<Transaction> GetAccountTransactions(string accountId);
         bool RevertTransaction(Transaction transaction, Bank bank);
-        Employee CreateAndGetEmployee(string name, string age, DateTime dob, Gender gender, EmployeeDesignation role, Bank bank);
-
+        Employee CreateAndGetEmployee(string name, int age, DateTime dob, Gender gender, EmployeeDesignation role, Bank bank);
+        List<Transaction> GetTransactionsByDate(DateTime date, Bank bank);
+        List<Transaction> GetTransactions(Bank bank);
+        Bank GetBankById(string bankid);
     }
 }

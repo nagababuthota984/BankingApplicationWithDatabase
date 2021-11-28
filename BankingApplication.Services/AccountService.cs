@@ -1,6 +1,7 @@
 ﻿using BankingApplication.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
@@ -9,23 +10,26 @@ namespace BankingApplication.Services
 {
     public class AccountService : IAccountService
     {
-        ITransactionService transService = new TransactionService();
-        IDataProvider dataProvider = new JsonFileHelper();
+        private ITransactionService transService = null;
+        public AccountService(ITransactionService transactionService)
+        {
+            transService = transactionService;
+        }
+
+        
 
         public bool IsValidCustomer(string userName, string password)
         {
-            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
+            using(SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand("select * from Account where username=@username and password=@password", conn);
-                SqlParameter userNameParameter = new SqlParameter("username", userName);
-                SqlParameter passwordParameter = new SqlParameter("password", password);
-                cmd.Parameters.Add(userNameParameter);
-                cmd.Parameters.Add(passwordParameter);
+                cmd.Parameters.AddWithValue("username",userName);
+                cmd.Parameters.AddWithValue("password",password);
                 SqlDataReader reader = cmd.ExecuteReader();
                 if (reader.Read())
                 {
-                    prepareSessionContext(reader);
+                    PrepareSessionContext(reader);
                     return true;
                 }
                 else
@@ -34,7 +38,7 @@ namespace BankingApplication.Services
             }
         }
 
-        private void prepareSessionContext(SqlDataReader reader)
+        private void PrepareSessionContext(SqlDataReader reader)
         {
             Account userAccount = new Account
             {
@@ -48,6 +52,7 @@ namespace BankingApplication.Services
             SessionContext.Account = userAccount;
         }
 
+        
         public Account GetAccountByAccNumber(string accNumber)
         {
             foreach (var bank in RBIStorage.banks)
@@ -68,39 +73,27 @@ namespace BankingApplication.Services
             return null;
         }
 
-        public void UpdateAccount(Account userAccount)
-        {
-            dataProvider.WriteData(RBIStorage.banks);
-        }
 
-        public bool DeleteAccount(Account userAccount)
-        {
-            userAccount.Status = AccountStatus.Closed;
-            dataProvider.WriteData(RBIStorage.banks);
-            return true;
-        }
         public void DepositAmount(Account userAccount, decimal amount, Currency currency)
         {
             amount *= currency.ExchangeRate;
             userAccount.Balance += amount;
             transService.CreateTransaction(userAccount, TransactionType.Credit, amount, currency);
-            dataProvider.WriteData(RBIStorage.banks);
+            JsonFileHelper.WriteData(RBIStorage.banks);
         }
         public void WithdrawAmount(Account userAccount, decimal amount)
         {
-            amount *= SessionContext.Bank.DefaultCurrency.ExchangeRate;
             userAccount.Balance -= amount;
             transService.CreateTransaction(userAccount, TransactionType.Debit, amount, SessionContext.Bank.DefaultCurrency);
-            dataProvider.WriteData(RBIStorage.banks);
+            JsonFileHelper.WriteData(RBIStorage.banks);
         }
         public void TransferAmount(Account senderAccount, Bank senderBank, Account receiverAccount, decimal amount, ModeOfTransfer mode)
         {
-            amount *= SessionContext.Bank.DefaultCurrency.ExchangeRate;
             senderAccount.Balance -= amount;
             receiverAccount.Balance += amount;
             ApplyTransferCharges(senderAccount, senderBank, receiverAccount.BankId, amount, mode, SessionContext.Bank.DefaultCurrency);
             transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.DefaultCurrency);
-            dataProvider.WriteData(RBIStorage.banks);
+            JsonFileHelper.WriteData(RBIStorage.banks);
         }
         public void ApplyTransferCharges(Account senderAccount, Bank senderBank, string receiverBankId, decimal amount, ModeOfTransfer mode, Currency currency)
         {
@@ -112,14 +105,14 @@ namespace BankingApplication.Services
                     decimal charges = (senderBank.SelfRTGS * amount) / 100;
                     senderAccount.Balance -= charges;
                     senderBank.Balance += charges;
-                    transService.CreateBankTransaction(senderBank, senderAccount, charges, currency);
+                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currency);
                 }
                 else
                 {
                     decimal charges = (senderBank.OtherRTGS * amount) / 100;
                     senderAccount.Balance -= charges;
                     senderBank.Balance += charges;
-                    transService.CreateBankTransaction(senderBank, senderAccount, charges, currency);
+                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currency);
                 }
             }
             else
@@ -129,17 +122,18 @@ namespace BankingApplication.Services
                     decimal charges = (senderBank.SelfIMPS * amount) / 100;
                     senderAccount.Balance -= charges;
                     senderBank.Balance += charges;
-                    transService.CreateBankTransaction(senderBank, senderAccount, charges, currency);
+                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currency);
                 }
                 else
                 {
                     decimal charges = (senderBank.OtherIMPS * amount) / 100;
                     senderAccount.Balance -= charges;
                     senderBank.Balance += charges;
-                    transService.CreateBankTransaction(senderBank, senderAccount, charges, currency);
+                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currency);
                 }
             }
         }
+    
 
     }
 }

@@ -3,13 +3,13 @@
 
     public enum MainMenu
     {
-        AccountHolder=1,
+        AccountHolder = 1,
         BankEmployee,
         None
     }
     public enum AccountHolderMenu
     {
-        Deposit=1,
+        Deposit = 1,
         Withdraw,
         Transfer,
         PrintStatement,
@@ -18,20 +18,21 @@
     }
     public enum BankEmployeeMenu
     {
-        CreateAccount=1,
+        CreateAccount = 1,
         AddBank,
         UpdateAccount,
         DeleteAccount,
         AddNewEmployee,
         AddNewCurrency,
-        SetServiceCharge,
+        ModifyServiceCharge,
+        ViewTransactionsForAccount,
         ViewTransactions,
         RevertTransaction,
         Logout
     }
     public enum AccountType
     {
-        Savings=1,
+        Savings = 1,
         Current
     }
     public enum TransactionType
@@ -43,13 +44,13 @@
     }
     public enum ModeOfTransfer
     {
-        RTGS=1,
+        RTGS = 1,
         IMPS,
         None
     }
     public enum EmployeeDesignation
     {
-        Manager=1,
+        Manager = 1,
         AccountsManager,
         FinancialAnalyst,
         LoanOfficer
@@ -62,13 +63,13 @@
     }
     public enum Gender
     {
-        Male=1,
+        Male = 1,
         Female,
         PreferNotToSay
     }
     public enum CustomerProperties
     {
-        Name=1,
+        Name = 1,
         Age,
         Gender,
         Dob,
