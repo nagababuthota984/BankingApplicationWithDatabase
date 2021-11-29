@@ -52,7 +52,6 @@ namespace BankingApplication.Services
             else
             {
                 PrepareEmployeeSessionContext(emp);
-                
                 return true;
             }
         }
@@ -60,7 +59,7 @@ namespace BankingApplication.Services
         private void PrepareEmployeeSessionContext(Employee emp)
         {
             SessionContext.Employee = emp;
-            SessionContext.Bank = GetBankByBankId(emp.BankId);
+            SessionContext.Bank = GetBankById(emp.BankId);
         }
 
         public void CreateAndAddAccount(Account newAccount, Bank bank)
@@ -105,27 +104,10 @@ namespace BankingApplication.Services
             } while (Utilities.IsDuplicateAccountNumber(accNumber, bankid));
             return accNumber;
         }
-        public Bank GetBankByBankId(string bankId)
+        public Bank GetBankById(string bankId)
         {
-            using(SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
-            {
-                conn.Open();
-                SqlCommand cmd = new SqlCommand("select * from bank where id=@bankid",conn);
-                cmd.Parameters.AddWithValue("bankid", bankId);
-                SqlDataReader reader = cmd.ExecuteReader();
-                if(reader.Read())
-                {
-                    Bank bank = new Bank
-                    {
-                        BankId = reader["id"].ToString(),
-                        BankName = reader["name"].ToString(),
-                        Branch = reader["branch"].ToString(),
-                        Ifsc = reader["ifsc"].ToString()
-                    };
-                    return bank;
-                }
-                return null;
-            }
+            BankAppDbContext dbContext = new BankAppDbContext();
+            return dbContext.bank.ToList().FirstOrDefault(b => b.BankId.EqualInvariant(bankId))??null;
         }
         public List<Transaction> GetTransactionsByDate(DateTime date, Bank bank)
         {
@@ -244,31 +226,8 @@ namespace BankingApplication.Services
 
         }
        
-        public Bank GetBankById(string bankid)
-        {
-            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
-            {
-                conn.Open();
-                SqlCommand cmd = new SqlCommand("select * from bank where id=@bankid", conn);
-                SqlParameter bankidParameter = new SqlParameter("@bankid", bankid);
-                cmd.Parameters.Add(bankidParameter);
-                SqlDataReader reader = cmd.ExecuteReader();
-                if (reader.Read())
-                {
-                    Bank bank = new Bank
-                    {
-                        BankId = reader["id"].ToString(),
-                        BankName = reader["name"].ToString(),
-                        Ifsc = reader["ifsc"].ToString()
-                    };
-                    return bank;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
+        
+        
     }
 }
 
