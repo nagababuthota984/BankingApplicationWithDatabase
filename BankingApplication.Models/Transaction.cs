@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace BankingApplication.Models
 {
     public class Transaction
     {
+        #region Properties
+        [Key]
         public string TransId { get; set; }
         public TransactionType Type { get; set; }
         public string SenderAccountId { get; set; }
@@ -15,15 +18,17 @@ namespace BankingApplication.Models
         public DateTime On { get; set; }
         public decimal TransactionAmount { get; set; }
         public decimal BalanceAmount { get; set; }
-        public Currency Currency { get; set; }
+        public string Currency { get; set; }
         public ModeOfTransfer TransferMode { get; set; }
+        #endregion
+
         public Transaction()
         {
 
         }
-        public Transaction(Account senderAccount,Account receiverAccount,TransactionType transtype, decimal transactionamount, Currency currency,ModeOfTransfer mode=ModeOfTransfer.None)
+        public Transaction(Account senderAccount, Account receiverAccount, TransactionType transtype, decimal transactionamount, string currencyName, ModeOfTransfer mode = ModeOfTransfer.None)
         {
-            DateTime timestamp = DateTime.Now; 
+            DateTime timestamp = DateTime.Now;
             this.TransId = $"TXN{senderAccount.BankId}{senderAccount.AccountId}{timestamp:yyyyMMddhhmmss}";
             this.SenderAccountId = senderAccount.AccountId;
             this.ReceiverAccountId = receiverAccount.AccountId;
@@ -32,22 +37,17 @@ namespace BankingApplication.Models
             this.SenderBankId = senderAccount.BankId;
             this.ReceiverBankId = receiverAccount.BankId;
             this.TransactionAmount = transactionamount;
-            this.Currency = currency;
+            this.Currency = currencyName;
             this.TransferMode = mode;
             this.BalanceAmount = senderAccount.Balance;
         }
-        public Transaction(Account userAccount, Bank bank, TransactionType serviceCharge, decimal charges, Currency currency)
-            : this(userAccount,userAccount,serviceCharge,charges,currency)
+        public Transaction(Account userAccount, Bank bank, TransactionType serviceCharge, decimal charges, string currencyName)
+            : this(userAccount, userAccount, serviceCharge, charges, currencyName)
         {
             //..creates a bank transaction
             this.ReceiverAccountId = bank.BankId;
             this.BalanceAmount = bank.Balance;
         }
-
-       
-
-
-        
     }
-    
+
 }

@@ -7,23 +7,23 @@ namespace BankingApplication.Services
     public class TransactionService : ITransactionService
     {
 
-        public void CreateTransaction(Account userAccount, TransactionType transtype, decimal transactionamount, Currency currency)
+        public void CreateTransaction(Account userAccount, TransactionType transtype, decimal transactionamount, string currencyName)
         {
-            Transaction newTransaction = new Transaction(userAccount, userAccount, transtype, transactionamount, currency);
+            Transaction newTransaction = new Transaction(userAccount, userAccount, transtype, transactionamount, currencyName);
             userAccount.Transactions.Add(newTransaction);
         }
-        public void CreateTransferTransaction(Account userAccount, Account receiverAccount, decimal transactionAmount, ModeOfTransfer mode, Currency currency)
+        public void CreateTransferTransaction(Account userAccount, Account receiverAccount, decimal transactionAmount, ModeOfTransfer mode, string currencyName)
         {
-            Transaction senderTransaction = new Transaction(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currency, mode);
+            Transaction senderTransaction = new Transaction(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currencyName, mode);
             userAccount.Transactions.Add(senderTransaction);
-            Transaction receiverTransaction = new Transaction(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currency, mode);
+            Transaction receiverTransaction = new Transaction(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currencyName, mode);
             receiverTransaction.BalanceAmount = receiverAccount.Balance;
             receiverAccount.Transactions.Add(receiverTransaction);
 
         }
-        public void CreateAndAddBankTransaction(Bank bank, Account userAccount, decimal charges, Currency currency)
+        public void CreateAndAddBankTransaction(Bank bank, Account userAccount, decimal charges, string currencyName)
         {
-            Transaction newBankTransaction = new Transaction(userAccount, bank, TransactionType.ServiceCharge, charges, currency);
+            Transaction newBankTransaction = new Transaction(userAccount, bank, TransactionType.ServiceCharge, charges, currencyName);
             bank.Transactions.Add(newBankTransaction);
         }
         public Transaction GetTransactionById(string transactionId)

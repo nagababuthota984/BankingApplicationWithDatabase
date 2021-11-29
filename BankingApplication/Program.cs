@@ -1,6 +1,7 @@
 ﻿using BankingApplication.Services;
 using System;
 using BankingApplication.Models;
+using System.Linq;
 
 namespace BankingApplication.CLI
 {
@@ -11,7 +12,7 @@ namespace BankingApplication.CLI
         private static BankEmployeePage employeePage;
         public static void Main()
         {
-            RBIStorage.banks = JsonFileHelper.GetData<Bank>(Constant.filePath);
+            
             Program p = new Program();
             p.InitializeUI();
         }

@@ -1,10 +1,31 @@
-﻿using System;
+﻿
+
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BankingApplication.Models
 {
-    public class Bank : BaseBank
+    public class Bank
     {
+        #region Properties
+        [Key]
+        public string BankId { get; set; } 
+        public string BankName { get; set; }
+        public string Branch { get; set; }
+        public string Ifsc { get; set; }
+        public List<Account> Accounts { get; set; }
+
+        public decimal SelfRTGS { get; set; }
+        public decimal SelfIMPS { get; set; }
+        public decimal OtherRTGS { get; set; }
+        public decimal OtherIMPS { get; set; }
+        public decimal Balance { get; set; }
+        public string DefaultCurrencyName { get; set; }
+        public List<Transaction> Transactions { get; set; }
+        public List<Employee> Employees { get; set; }
+        public List<Currency> SupportedCurrency { get; set; }
+        #endregion Properties
         public Bank()
         {
 
@@ -20,23 +41,11 @@ namespace BankingApplication.Models
             OtherRTGS = 2;
             OtherIMPS = 6;
             Balance = 0;
-            SupportedCurrency = new List<Currency> { new Currency("INR", 1) };
-            DefaultCurrency = new Currency("INR", 1);
+            SupportedCurrency = new List<Currency> { new Currency("INR", 1,BankId) };
+            DefaultCurrencyName = "INR";
             Accounts = new List<Account>();
             Transactions = new List<Transaction>();
-            Employees = new List<Employee>();
+            Employees = new List<Employee> { new Employee(BankId) };          //default employee
         }
-
-        public List<Account> Accounts { get; set; }
-        
-        public decimal SelfRTGS { get; set; }
-        public decimal SelfIMPS { get; set; }
-        public decimal OtherRTGS { get; set; }
-        public decimal OtherIMPS { get; set; }
-        public decimal Balance { get; set; }
-        public Currency DefaultCurrency { get; set; }
-        public List<Transaction> Transactions  { get; set; }
-        public List<Employee> Employees { get; set; }
-        public List<Currency> SupportedCurrency { get; set; }
     }
 }

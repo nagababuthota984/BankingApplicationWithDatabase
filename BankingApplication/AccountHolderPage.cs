@@ -68,7 +68,7 @@ namespace BankingApplication.CLI
                     UserOutput.ShowTransactions(SessionContext.Account.Transactions);
                     break;
                 case AccountHolderMenu.CheckBalance:
-                    Console.WriteLine($"\nCurrent Balance - {SessionContext.Account.Balance} {SessionContext.Bank.DefaultCurrency.Name}\n");
+                    Console.WriteLine($"\nCurrent Balance - {SessionContext.Account.Balance} {SessionContext.Bank.DefaultCurrencyName}\n");
                     break;
                 case AccountHolderMenu.LogOut:
                     SessionContext.Employee = null;

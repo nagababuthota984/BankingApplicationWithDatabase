@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace BankingApplication.Models
@@ -10,6 +11,7 @@ namespace BankingApplication.Models
         public string BankId { get; set; }
         public Customer Customer { get; set; }
         public string AccountNumber { get; set; }
+        [Key]
         public string AccountId { get; set; }
         public AccountType AccountType { get; set; }
         public decimal Balance { get; set; }

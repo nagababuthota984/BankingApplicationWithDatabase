@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace BankingApplication.Models
@@ -7,6 +8,8 @@ namespace BankingApplication.Models
     public class Customer
     {
         #region Properties
+        [Key]
+        public string CustomerId { get; set; }
         public string AccountId { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
@@ -31,6 +34,7 @@ namespace BankingApplication.Models
             this.AadharNumber = aadharNumber;
             this.ContactNumber = contactNumber;
             this.PanNumber = panNumber;
+            
         }
 
     }

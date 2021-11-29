@@ -78,24 +78,24 @@ namespace BankingApplication.Services
         {
             amount *= currency.ExchangeRate;
             userAccount.Balance += amount;
-            transService.CreateTransaction(userAccount, TransactionType.Credit, amount, currency);
+            transService.CreateTransaction(userAccount, TransactionType.Credit, amount, currency.Name);
             JsonFileHelper.WriteData(RBIStorage.banks);
         }
         public void WithdrawAmount(Account userAccount, decimal amount)
         {
             userAccount.Balance -= amount;
-            transService.CreateTransaction(userAccount, TransactionType.Debit, amount, SessionContext.Bank.DefaultCurrency);
+            transService.CreateTransaction(userAccount, TransactionType.Debit, amount, SessionContext.Bank.DefaultCurrencyName);
             JsonFileHelper.WriteData(RBIStorage.banks);
         }
         public void TransferAmount(Account senderAccount, Bank senderBank, Account receiverAccount, decimal amount, ModeOfTransfer mode)
         {
             senderAccount.Balance -= amount;
             receiverAccount.Balance += amount;
-            ApplyTransferCharges(senderAccount, senderBank, receiverAccount.BankId, amount, mode, SessionContext.Bank.DefaultCurrency);
-            transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.DefaultCurrency);
+            ApplyTransferCharges(senderAccount, senderBank, receiverAccount.BankId, amount, mode, SessionContext.Bank.DefaultCurrencyName);
+            transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.DefaultCurrencyName);
             JsonFileHelper.WriteData(RBIStorage.banks);
         }
-        public void ApplyTransferCharges(Account senderAccount, Bank senderBank, string receiverBankId, decimal amount, ModeOfTransfer mode, Currency currency)
+        public void ApplyTransferCharges(Account senderAccount, Bank senderBank, string receiverBankId, decimal amount, ModeOfTransfer mode, string currencyName)
         {
             if (mode == ModeOfTransfer.RTGS)
             {
@@ -105,14 +105,14 @@ namespace BankingApplication.Services
                     decimal charges = (senderBank.SelfRTGS * amount) / 100;
                     senderAccount.Balance -= charges;
                     senderBank.Balance += charges;
-                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currency);
+                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currencyName);
                 }
                 else
                 {
                     decimal charges = (senderBank.OtherRTGS * amount) / 100;
                     senderAccount.Balance -= charges;
                     senderBank.Balance += charges;
-                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currency);
+                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currencyName);
                 }
             }
             else
@@ -122,14 +122,14 @@ namespace BankingApplication.Services
                     decimal charges = (senderBank.SelfIMPS * amount) / 100;
                     senderAccount.Balance -= charges;
                     senderBank.Balance += charges;
-                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currency);
+                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currencyName);
                 }
                 else
                 {
                     decimal charges = (senderBank.OtherIMPS * amount) / 100;
                     senderAccount.Balance -= charges;
                     senderBank.Balance += charges;
-                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currency);
+                    transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currencyName);
                 }
             }
         }

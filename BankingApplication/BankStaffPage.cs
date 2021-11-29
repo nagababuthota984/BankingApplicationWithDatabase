@@ -124,6 +124,7 @@ namespace BankingApplication.CLI
             Customer newCustomer = new Customer(name, age, gender, dob, contactNumber, aadharNumber, panNumber, address);
             Account newAccount = new Account(newCustomer, accountType, SessionContext.Bank);
             bankService.CreateAndAddAccount(newAccount, SessionContext.Bank);
+            newCustomer.CustomerId = newAccount.AccountId;
             UserOutput.ShowMessage($"Account has been created!\nCredentials:Username - {newAccount.UserName}\nPassword - {newAccount.Password}\nAccount Number - {newAccount.AccountNumber}\n");
         }
         private void AddBankInterface()

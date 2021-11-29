@@ -25,7 +25,7 @@ namespace BankingApplication.Services
                 createBankCommand.Parameters.Add("@name", SqlDbType.VarChar).Value = newBank.BankName;
                 createBankCommand.Parameters.Add("@branch", SqlDbType.VarChar).Value = newBank.Branch;
                 createBankCommand.Parameters.Add("@ifsc", SqlDbType.VarChar).Value = newBank.Ifsc;
-                createBankCommand.Parameters.Add("@defualtcurrency", SqlDbType.VarChar).Value = newBank.DefaultCurrency.Name;
+                createBankCommand.Parameters.Add("@defualtcurrency", SqlDbType.VarChar).Value = newBank.DefaultCurrencyName;
                 if(createBankCommand.ExecuteNonQuery()!=-1)
                 {
                     return newBank;
@@ -45,45 +45,29 @@ namespace BankingApplication.Services
         }
         public bool IsValidEmployee(string userName, string password)
         {
-            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
+            BankAppDbContext dbContext = new BankAppDbContext();
+            Employee emp = dbContext.employee.ToList().FirstOrDefault(e=>e.UserName.EqualInvariant(userName) && e.Password.EqualInvariant(password));
+            if (emp == null)
+                return false;
+            else
             {
-                conn.Open();
-                SqlCommand cmd = new SqlCommand("select * from Employee where username=@username and password=@password", conn);
-                cmd.Parameters.AddWithValue("@username", userName);
-                cmd.Parameters.AddWithValue("@password", password);
-                SqlDataReader reader = cmd.ExecuteReader();
-                if (reader.Read())
-                {
-                    PrepareEmployeeSessionContext(reader);
-                    return true;
-                }
-                else
-                    return false;
-
+                PrepareEmployeeSessionContext(emp);
+                
+                return true;
             }
-
-
         }
 
-        private void PrepareEmployeeSessionContext(SqlDataReader reader)
+        private void PrepareEmployeeSessionContext(Employee emp)
         {
-            Employee emp = new Employee
-            {
-                EmployeeId = reader["employeeId"].ToString(),
-                Name = reader["Name"].ToString(),
-                UserName = reader["username"].ToString(),
-                Password = reader["password"].ToString(),
-                BankId = reader["bankid"].ToString(),
-                Dob = Convert.ToDateTime(reader["dob"].ToString())
-            };
             SessionContext.Employee = emp;
+            SessionContext.Bank = GetBankByBankId(emp.BankId);
         }
 
         public void CreateAndAddAccount(Account newAccount, Bank bank)
         {
             newAccount.BankId = bank.BankId;
             newAccount.AccountNumber = GenerateAccountNumber(bank.BankId);
-            using(SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
+            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
             {
                 conn.Open();
                 SqlCommand createAccountCommand = new SqlCommand($"insert into account values(@accountId,@bankId,@accountNumber,@username,@password,@accountType,@balance,@status)", conn);
@@ -173,7 +157,7 @@ namespace BankingApplication.Services
             {
                 return false;
             }
-            bank.SupportedCurrency.Add(new Currency(newCurrencyName, exchangeRate));
+            bank.SupportedCurrency.Add(new Currency(newCurrencyName, exchangeRate,bank.BankId));
             JsonFileHelper.WriteData(RBIStorage.banks);
             return true;
         }
@@ -242,7 +226,7 @@ namespace BankingApplication.Services
             }
             else if (transaction.Type == TransactionType.Debit)
             {
-                accountService.DepositAmount(userAccount, transaction.TransactionAmount, bank.DefaultCurrency);
+                accountService.DepositAmount(userAccount, transaction.TransactionAmount, bank.SupportedCurrency.FirstOrDefault(c => c.Name.EqualInvariant(bank.DefaultCurrencyName)));
                 userAccount.Transactions.Remove(transaction);
             }
             else if (transaction.Type == TransactionType.Transfer)
@@ -250,7 +234,7 @@ namespace BankingApplication.Services
                 Account receiverAccount = accountService.GetAccountById(transaction.ReceiverAccountId);
                 accountService.WithdrawAmount(receiverAccount, transaction.TransactionAmount);
                 receiverAccount.Transactions.Remove(transaction);
-                accountService.DepositAmount(userAccount, transaction.TransactionAmount, bank.DefaultCurrency);
+                accountService.DepositAmount(userAccount, transaction.TransactionAmount, bank.SupportedCurrency.FirstOrDefault(c=>c.Name.EqualInvariant(bank.DefaultCurrencyName)));
                 userAccount.Transactions.Remove(transaction);
 
 
