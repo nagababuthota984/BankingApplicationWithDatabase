@@ -61,7 +61,5 @@ namespace BankingApplication.CLI
             else
                 return MainMenu.None;
         }
-
-
     }
 }

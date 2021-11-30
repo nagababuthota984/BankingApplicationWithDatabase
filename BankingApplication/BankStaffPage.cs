@@ -12,12 +12,14 @@ namespace BankingApplication.CLI
         private readonly IAccountService accountService;
         private readonly ITransactionService transactionService;
         private readonly Program program;
+        private readonly BankAppDbContext dbContext;
         public BankEmployeePage()
         {
             bankService = Factory.CreateBankService();
             accountService = Factory.CreateAccountService();
             transactionService = Factory.CreateTransactionService();
             program = new Program();
+            dbContext = Factory.CreateBankAppDbContext();
         }
         public void EmployeeInterface()
         {
@@ -38,7 +40,6 @@ namespace BankingApplication.CLI
             {
                 try
                 {
-                    SessionContext.Bank = bankService.GetBankById(SessionContext.Employee.BankId);
                     EmployeeActions();
 
                 }
@@ -122,7 +123,7 @@ namespace BankingApplication.CLI
             string address = UserInput.GetInputValue(Constant.address);
             AccountType accountType = (AccountType)UserInput.GetIntegerInput(Constant.accountTypeOptions);
             Customer newCustomer = new Customer(name, age, gender, dob, contactNumber, aadharNumber, panNumber, address);
-            Account newAccount = new Account(newCustomer, accountType, SessionContext.Bank);
+            Account newAccount = new Account(newCustomer, accountType,SessionContext.Bank, dbContext.account.ToList());
             bankService.CreateAndAddAccount(newAccount, SessionContext.Bank);
             newCustomer.CustomerId = newAccount.AccountId;
             UserOutput.ShowMessage($"Account has been created!\nCredentials:Username - {newAccount.UserName}\nPassword - {newAccount.Password}\nAccount Number - {newAccount.AccountNumber}\n");
@@ -131,7 +132,7 @@ namespace BankingApplication.CLI
         {
             Console.WriteLine(Constant.addBankHeader);
             string bankName = GetName();
-            if (!RBIStorage.banks.Any(bank => bank.BankName.EqualInvariant(bankName)))
+            if (!dbContext.bank.ToList().Any(bank => bank.BankName.EqualInvariant(bankName)))
             {
                 string branch = UserInput.GetInputValue(Constant.branch);
                 string ifsc = UserInput.GetInputValue(Constant.Ifsc);
@@ -149,66 +150,70 @@ namespace BankingApplication.CLI
         private void UpdateAccountInterface()
         {
             string accountId = UserInput.GetInputValue(Constant.accountId);
-            Account userAccount = SessionContext.Bank.Accounts.FirstOrDefault(acc => acc.AccountId.EqualInvariant(accountId));
+            Account userAccount = dbContext.account.ToList().FirstOrDefault(acc => acc.AccountId.EqualInvariant(accountId));
             if (userAccount != null)
             {
-                UpdateAccountHandler(userAccount);
-                Console.WriteLine(Constant.updateConfirmation);
-                if (Console.ReadLine().EqualInvariant("y"))
+                Customer customer = dbContext.customer.ToList().FirstOrDefault(cust => cust.AccountId.EqualInvariant(accountId));
+                if (customer!=null)
                 {
-                    bankService.UpdateAccount(userAccount);
-                    Console.WriteLine(Constant.updateSuccess);
+                    UpdateAccountHandler(customer);
+                    Console.WriteLine(Constant.updateConfirmation);
+                    if (Console.ReadLine().EqualInvariant("y"))
+                    {
+                        bankService.UpdateAccount(customer);
+                        Console.WriteLine(Constant.updateSuccess);
+                    }
+                    else
+                        Console.WriteLine(Constant.updateFail); 
                 }
-                else
-                    Console.WriteLine(Constant.updateFail);
             }
             else
                 UserOutput.ShowMessage(Constant.accountNotFoundError);
         }
-        private void UpdateAccountHandler(Account userAccount)
+        private void UpdateAccountHandler(Customer customer)
         {
             Console.WriteLine(Constant.updateMenuHeader);
             Console.WriteLine(Constant.customerPropertiesMenu);
             switch (GetCustomerPropertyByInteger(Convert.ToInt32(Console.ReadLine())))
             {
                 case CustomerProperties.Name:
-                    Console.WriteLine($"[Existing : {userAccount.Customer.Name}]");
-                    userAccount.Customer.Name = GetName();
+                    Console.WriteLine($"[Existing : {customer.Name}]");
+                    customer.Name = GetName();
                     break;
                 case CustomerProperties.Age:
-                    Console.WriteLine($"[Existing : {userAccount.Customer.Age}]");
-                    userAccount.Customer.Age = GetAge();
+                    Console.WriteLine($"[Existing : {customer.Age}]");
+                    customer.Age = GetAge();
                     break;
                 case CustomerProperties.Dob:
-                    Console.WriteLine($"[Existing : {userAccount.Customer.Dob}]");
-                    userAccount.Customer.Dob = GetDateTimeInput(UserInput.GetInputValue("Date of Birth"));
+                    Console.WriteLine($"[Existing : {customer.Dob}]");
+                    customer.Dob = GetDateTimeInput(UserInput.GetInputValue("Date of Birth"));
                     break;
                 case CustomerProperties.AadharNumber:
-                    Console.WriteLine($"[Existing : {userAccount.Customer.AadharNumber}]");
-                    userAccount.Customer.AadharNumber = UserInput.GetLongInput("Aadhar number");
+                    Console.WriteLine($"[Existing : {customer.AadharNumber}]");
+                    customer.AadharNumber = UserInput.GetLongInput("Aadhar number");
                     break;
                 case CustomerProperties.PanNumber:
-                    Console.WriteLine($"[Existing : {userAccount.Customer.PanNumber}]");
-                    userAccount.Customer.PanNumber = UserInput.GetInputValue("Pan number");
+                    Console.WriteLine($"[Existing : {customer.PanNumber}]");
+                    customer.PanNumber = UserInput.GetInputValue("Pan number");
                     break;
                 case CustomerProperties.ContactNumber:
-                    Console.WriteLine($"[Existing : {userAccount.Customer.ContactNumber}]");
-                    userAccount.Customer.ContactNumber = UserInput.GetInputValue("Contact number");
+                    Console.WriteLine($"[Existing : {customer.ContactNumber}]");
+                    customer.ContactNumber = UserInput.GetInputValue("Contact number");
                     break;
                 case CustomerProperties.Address:
-                    Console.WriteLine($"[Existing : {userAccount.Customer.Address}]");
-                    userAccount.Customer.Address = UserInput.GetInputValue("Address");
+                    Console.WriteLine($"[Existing : {customer.Address}]");
+                    customer.Address = UserInput.GetInputValue("Address");
                     break;
                 default:
                     return;
 
             }
-            UpdateAccountHandler(userAccount);
+            UpdateAccountHandler(customer);
         }
         private void DeleteAccountInterface()
         {
             string accountId = UserInput.GetInputValue(Constant.accountId);
-            Account userAccount = SessionContext.Bank.Accounts.FirstOrDefault(acc => acc.AccountId.EqualInvariant(accountId));
+            Account userAccount = dbContext.account.ToList().FirstOrDefault(acc => acc.AccountId.EqualInvariant(accountId));
             if (userAccount != null)
             {
                 Console.WriteLine(Constant.deleteAccountConfirmation);

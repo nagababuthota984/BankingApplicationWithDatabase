@@ -10,7 +10,7 @@ namespace BankingApplication.Services
         Bank CreateAndGetBank(string name, string branch, string ifsc);
         bool IsValidEmployee(string userName, string password);
         void CreateAndAddAccount(Account newAccount, Bank bank);
-        void UpdateAccount(Account userAccount);
+        void UpdateAccount(Customer customer);
         bool DeleteAccount(Account userAccount);
         bool AddNewCurrency(Bank bank, string newName, decimal exchangeRate);
         bool ModifyServiceCharge(ModeOfTransfer mode, bool isSelfBankCharge, Bank bank, decimal newValue);

@@ -10,31 +10,18 @@ namespace BankingApplication.Services
     public class BankService : IBankService
     {
         private IAccountService accountService = null;
-        public BankService(IAccountService accService)
+        private BankAppDbContext dbContext = null;
+        public BankService(IAccountService accService,BankAppDbContext context)
         {
-            accountService = Factory.CreateAccountService();
+            accountService = accService;
+            dbContext = context;
         }
         public Bank CreateAndGetBank(string name, string branch, string ifsc)
         {
             Bank newBank = new Bank(name, branch, ifsc);
-            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
-            {
-                conn.Open();
-                SqlCommand createBankCommand = new SqlCommand("insert into bank values(@bankid,@name,@branch,@ifsc,@defualtcurrency)",conn);
-                createBankCommand.Parameters.Add("@bankid",SqlDbType.VarChar).Value = newBank.BankId;
-                createBankCommand.Parameters.Add("@name", SqlDbType.VarChar).Value = newBank.BankName;
-                createBankCommand.Parameters.Add("@branch", SqlDbType.VarChar).Value = newBank.Branch;
-                createBankCommand.Parameters.Add("@ifsc", SqlDbType.VarChar).Value = newBank.Ifsc;
-                createBankCommand.Parameters.Add("@defualtcurrency", SqlDbType.VarChar).Value = newBank.DefaultCurrencyName;
-                if(createBankCommand.ExecuteNonQuery()!=-1)
-                {
-                    return newBank;
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            dbContext.bank.Add(newBank);
+            dbContext.SaveChanges();
+            return newBank;
         }
         public Employee CreateAndGetEmployee(string name, int age, DateTime dob, Gender gender, EmployeeDesignation role, Bank bank)
         {
@@ -45,7 +32,6 @@ namespace BankingApplication.Services
         }
         public bool IsValidEmployee(string userName, string password)
         {
-            BankAppDbContext dbContext = new BankAppDbContext();
             Employee emp = dbContext.employee.ToList().FirstOrDefault(e=>e.UserName.EqualInvariant(userName) && e.Password.EqualInvariant(password));
             if (emp == null)
                 return false;
@@ -65,49 +51,13 @@ namespace BankingApplication.Services
         public void CreateAndAddAccount(Account newAccount, Bank bank)
         {
             newAccount.BankId = bank.BankId;
-            newAccount.AccountNumber = GenerateAccountNumber(bank.BankId);
-            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
-            {
-                conn.Open();
-                SqlCommand createAccountCommand = new SqlCommand($"insert into account values(@accountId,@bankId,@accountNumber,@username,@password,@accountType,@balance,@status)", conn);
-                createAccountCommand.Parameters.Add("@accountId", SqlDbType.VarChar).Value = newAccount.AccountId;
-                createAccountCommand.Parameters.Add("@bankId", SqlDbType.VarChar).Value = newAccount.BankId;
-                createAccountCommand.Parameters.Add("@accountNumber", SqlDbType.VarChar).Value = newAccount.AccountNumber;
-                createAccountCommand.Parameters.Add("@username", SqlDbType.VarChar).Value = newAccount.UserName;
-                createAccountCommand.Parameters.Add("@password", SqlDbType.VarChar).Value = newAccount.Password;
-                createAccountCommand.Parameters.Add("@accountType", SqlDbType.VarChar).Value = newAccount.AccountType;
-                createAccountCommand.Parameters.Add("@balance", SqlDbType.Decimal).Value = newAccount.Balance;
-                createAccountCommand.Parameters.Add("@status", SqlDbType.VarChar).Value = newAccount.Status;
-                if(createAccountCommand.ExecuteNonQuery()!=-1)
-                {
-                    SqlCommand createCustomerCommand = new SqlCommand($"insert into customer values(@customerId,@name,@age,@dob,@contactNumber,@aadharNumber,@panNumber,@address,@accountId)", conn);
-                    createCustomerCommand.Parameters.Add("@customerId", SqlDbType.VarChar).Value = newAccount.AccountId;
-                    createCustomerCommand.Parameters.Add("@name", SqlDbType.VarChar).Value = newAccount.Customer.Name;
-                    createCustomerCommand.Parameters.Add("@age", SqlDbType.Int).Value = newAccount.Customer.Age;
-                    createCustomerCommand.Parameters.Add("@dob", SqlDbType.DateTime).Value = newAccount.Customer.Dob;
-                    createCustomerCommand.Parameters.Add("@contactNumber", SqlDbType.VarChar).Value = newAccount.Customer.ContactNumber;
-                    createCustomerCommand.Parameters.Add("@aadharNumber", SqlDbType.VarChar).Value = newAccount.Customer.AadharNumber;
-                    createCustomerCommand.Parameters.Add("@panNumber", SqlDbType.VarChar).Value = newAccount.Customer.PanNumber;
-                    createCustomerCommand.Parameters.Add("@address", SqlDbType.VarChar).Value = newAccount.Customer.Address;
-                    createCustomerCommand.Parameters.Add("@accountId", SqlDbType.VarChar).Value = newAccount.AccountId;
-                    createCustomerCommand.ExecuteNonQuery();
-
-                }
-            }
+            dbContext.account.Add(newAccount);
+            dbContext.SaveChanges();
         }
-        public string GenerateAccountNumber(string bankid)
-        {
-            string accNumber = null;
-            do
-            {
-                accNumber = Utilities.GenerateRandomNumber(12).ToString();
-            } while (Utilities.IsDuplicateAccountNumber(accNumber, bankid));
-            return accNumber;
-        }
+        
         public Bank GetBankById(string bankId)
         {
-            BankAppDbContext dbContext = new BankAppDbContext();
-            return dbContext.bank.ToList().FirstOrDefault(b => b.BankId.EqualInvariant(bankId))??null;
+            return dbContext.bank.ToList().FirstOrDefault(b => b.BankId.EqualInvariant(bankId));
         }
         public List<Transaction> GetTransactionsByDate(DateTime date, Bank bank)
         {
@@ -143,28 +93,17 @@ namespace BankingApplication.Services
             JsonFileHelper.WriteData(RBIStorage.banks);
             return true;
         }
-        public void UpdateAccount(Account userAccount)
+        public void UpdateAccount(Customer customer)
         {
-            using (SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
-            {
-                conn.Open();
-                SqlCommand updateCustomer = new SqlCommand("update customer set name=@name,age=@age,dob=@dob,contactNumber=@contactNumber,aadharNumber=@aadharNumber,panNumber=@panNumber,address=@address where accountId=@accountId", conn);
-                updateCustomer.Parameters.Add("@name", SqlDbType.VarChar).Value = userAccount.Customer.Name;
-                updateCustomer.Parameters.Add("@age", SqlDbType.Int).Value = userAccount.Customer.Age;
-                updateCustomer.Parameters.Add("@dob", SqlDbType.DateTime).Value = userAccount.Customer.Dob;
-                updateCustomer.Parameters.Add("@contactNumber", SqlDbType.VarChar).Value = userAccount.Customer.ContactNumber;
-                updateCustomer.Parameters.Add("@aadharNumber", SqlDbType.VarChar).Value = userAccount.Customer.AadharNumber;
-                updateCustomer.Parameters.Add("@panNumber", SqlDbType.VarChar).Value = userAccount.Customer.PanNumber;
-                updateCustomer.Parameters.Add("@address", SqlDbType.VarChar).Value = userAccount.Customer.Address;
-                updateCustomer.Parameters.Add("@accountId", SqlDbType.VarChar).Value = userAccount.Customer.AccountId;
-                updateCustomer.ExecuteNonQuery();
-            }
+            dbContext.customer.Update(customer);
+            dbContext.SaveChanges();
         }
 
         public bool DeleteAccount(Account userAccount)
         {
             userAccount.Status = AccountStatus.Closed;
-            JsonFileHelper.WriteData(RBIStorage.banks);
+            dbContext.account.Update(userAccount);
+            dbContext.SaveChanges();
             return true;
         }
         public bool ModifyServiceCharge(ModeOfTransfer mode, bool isSelfBankCharge, Bank bank, decimal newValue)

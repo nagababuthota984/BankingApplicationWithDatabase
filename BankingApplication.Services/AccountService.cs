@@ -11,66 +11,44 @@ namespace BankingApplication.Services
     public class AccountService : IAccountService
     {
         private ITransactionService transService = null;
-        public AccountService(ITransactionService transactionService)
+        private BankAppDbContext dbContext = null;
+        public AccountService(ITransactionService transactionService,BankAppDbContext context)
         {
             transService = transactionService;
+            dbContext = context;
         }
 
         
 
         public bool IsValidCustomer(string userName, string password)
         {
-            using(SqlConnection conn = new SqlConnection(SqlHelper.connectionString))
+            Account acc = dbContext.account.FirstOrDefault(x => x.UserName.EqualInvariant(userName) && x.Password.EqualInvariant(password));
+            if (acc == null)
+                return false;
+            else
             {
-                conn.Open();
-                SqlCommand cmd = new SqlCommand("select * from Account where username=@username and password=@password", conn);
-                cmd.Parameters.AddWithValue("username",userName);
-                cmd.Parameters.AddWithValue("password",password);
-                SqlDataReader reader = cmd.ExecuteReader();
-                if (reader.Read())
-                {
-                    PrepareSessionContext(reader);
-                    return true;
-                }
-                else
-                    return false;
-
+                PrepareCustomerSessionContext(acc);
+                return true;
             }
+
         }
 
-        private void PrepareSessionContext(SqlDataReader reader)
+        private void PrepareCustomerSessionContext(Account acc)
         {
-            Account userAccount = new Account
-            {
-                AccountId = reader["accountId"].ToString(),
-                AccountNumber = reader["accountNumber"].ToString(),
-                UserName = reader["username"].ToString(),
-                Balance = Convert.ToDecimal(reader["balance"]),
-                BankId = reader["bankid"].ToString()
-            };
-            userAccount.SetPassword(reader["password"].ToString());
-            SessionContext.Account = userAccount;
+
+            SessionContext.Account = acc;
+            SessionContext.Bank = dbContext.bank.ToList().FirstOrDefault(b=>b.BankId.EqualInvariant(acc.BankId)); 
         }
 
         
         public Account GetAccountByAccNumber(string accNumber)
         {
-            foreach (var bank in RBIStorage.banks)
-            {
-                Account account = bank.Accounts.FirstOrDefault(a => (a.AccountNumber.EqualInvariant(accNumber)) && (a.Status != AccountStatus.Closed));
-                if (account != null) return account;
-            }
-            return null;
+            return dbContext.account.FirstOrDefault(ac=>ac.AccountNumber.EqualInvariant(accNumber));
         }
 
         public Account GetAccountById(string accountId)
         {
-            foreach (Bank bank in RBIStorage.banks)
-            {
-                Account account = bank.Accounts.FirstOrDefault(a => a.AccountId.EqualInvariant(accountId) && (a.Status != AccountStatus.Closed));
-                if (account != null) return account;
-            }
-            return null;
+            return dbContext.account.FirstOrDefault(ac=>ac.AccountNumber.EqualInvariant(accountId));
         }
 
 
@@ -79,13 +57,13 @@ namespace BankingApplication.Services
             amount *= currency.ExchangeRate;
             userAccount.Balance += amount;
             transService.CreateTransaction(userAccount, TransactionType.Credit, amount, currency.Name);
-            JsonFileHelper.WriteData(RBIStorage.banks);
+            dbContext.SaveChanges();
         }
         public void WithdrawAmount(Account userAccount, decimal amount)
         {
             userAccount.Balance -= amount;
             transService.CreateTransaction(userAccount, TransactionType.Debit, amount, SessionContext.Bank.DefaultCurrencyName);
-            JsonFileHelper.WriteData(RBIStorage.banks);
+            dbContext.SaveChanges();
         }
         public void TransferAmount(Account senderAccount, Bank senderBank, Account receiverAccount, decimal amount, ModeOfTransfer mode)
         {
@@ -93,7 +71,8 @@ namespace BankingApplication.Services
             receiverAccount.Balance += amount;
             ApplyTransferCharges(senderAccount, senderBank, receiverAccount.BankId, amount, mode, SessionContext.Bank.DefaultCurrencyName);
             transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.DefaultCurrencyName);
-            JsonFileHelper.WriteData(RBIStorage.banks);
+            dbContext.SaveChanges();
+
         }
         public void ApplyTransferCharges(Account senderAccount, Bank senderBank, string receiverBankId, decimal amount, ModeOfTransfer mode, string currencyName)
         {

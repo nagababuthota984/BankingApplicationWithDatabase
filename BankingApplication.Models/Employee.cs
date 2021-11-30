@@ -22,8 +22,9 @@ namespace BankingApplication.Models
         {
 
         }
-        public Employee(string bankId)
+        public Employee(string bankId,string bankName)
         {
+            this.EmployeeId = $"{bankName.Substring(0, 3)}{DateTime.Now:yyyyMMddhhmm}";
             this.UserName = bankId;
             this.Password = bankId;
             this.BankId = bankId;

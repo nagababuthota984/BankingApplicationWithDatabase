@@ -26,6 +26,7 @@ namespace BankingApplication.Models
         }
         public Customer(string name, int age, Gender gender, DateTime dob, string contactNumber, long aadharNumber, string panNumber, string address)
         {
+            this.CustomerId = name.Substring(0, 3) + Age.ToString() + panNumber.Substring(0, 3);
             this.Name = name;
             this.Age = age;
             this.Gender = gender;

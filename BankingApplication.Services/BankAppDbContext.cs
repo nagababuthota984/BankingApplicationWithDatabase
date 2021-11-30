@@ -12,6 +12,7 @@ namespace BankingApplication.Services
         public DbSet<Account> account { get; set; }
         public DbSet<Employee> employee { get; set; }
         public DbSet<Transaction> transaction { get; set; }
+        public DbSet<Customer> customer { get; set; }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -25,7 +25,7 @@ namespace BankingApplication.Models
         {
 
         }
-        public Account(Customer customer, AccountType type, Bank bank)
+        public Account(Customer customer, AccountType type,Bank bank, List<Account> accounts)
         {
             this.Customer = customer;
             this.UserName = $"{customer.Name}{customer.Dob:yyyy}";
@@ -34,17 +34,17 @@ namespace BankingApplication.Models
             this.Customer.AccountId = this.AccountId;
             this.AccountType = type;
             this.Transactions = new List<Transaction>();
-            this.AccountNumber = GenerateAccountNumber(bank);
+            this.AccountNumber = GenerateAccountNumber(accounts);
             this.BankId = bank.BankId;
         }
 
-        private string GenerateAccountNumber(Bank bank)
+        private string GenerateAccountNumber(List<Account> accounts)
         {
             string accNumber;
             do
             {
                 accNumber = GenerateRandomNumber(12);
-            } while (bank.Accounts.Any(account => account.AccountNumber.Equals(accNumber)));
+            } while (accounts.Any(account => account.AccountNumber.Equals(accNumber)));
             return accNumber;
         }
 

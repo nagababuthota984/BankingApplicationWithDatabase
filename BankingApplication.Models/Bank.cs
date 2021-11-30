@@ -45,7 +45,7 @@ namespace BankingApplication.Models
             DefaultCurrencyName = "INR";
             Accounts = new List<Account>();
             Transactions = new List<Transaction>();
-            Employees = new List<Employee> { new Employee(BankId) };          //default employee
+            Employees = new List<Employee> { new Employee(BankId,BankName) };          //default employee
         }
     }
 }

@@ -1,20 +1,21 @@
 ﻿using BankingApplication.Models;
 using BankingApplication.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BankingApplication.Services
+namespace BankingApplication.CLI
 {
     public static class Factory
     {
         public static IAccountService CreateAccountService()
         {
-            return new AccountService(CreateTransactionService());
+            return new AccountService(CreateTransactionService(),CreateBankAppDbContext());
         }
         public static IBankService CreateBankService()
         {
-            return new BankService(CreateAccountService());
+            return new BankService(CreateAccountService(),CreateBankAppDbContext());
         }
         public static ITransactionService CreateTransactionService()
         {
@@ -23,6 +24,10 @@ namespace BankingApplication.Services
         public static JsonFileHelper CreateJsonFileHelperService()
         {
             return new JsonFileHelper();
+        }
+        public static BankAppDbContext CreateBankAppDbContext()
+        {
+            return new BankAppDbContext();
         }
 
     }
