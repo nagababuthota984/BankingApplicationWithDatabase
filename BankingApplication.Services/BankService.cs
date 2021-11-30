@@ -26,8 +26,8 @@ namespace BankingApplication.Services
         public Employee CreateAndGetEmployee(string name, int age, DateTime dob, Gender gender, EmployeeDesignation role, Bank bank)
         {
             Employee employee = new Employee(name, age, dob, gender, role, bank);
-            bank.Employees.Add(employee);
-            JsonFileHelper.WriteData(RBIStorage.banks);
+            dbContext.employee.Add(employee);
+            dbContext.SaveChanges();
             return employee;
         }
         public bool IsValidEmployee(string userName, string password)
@@ -71,7 +71,7 @@ namespace BankingApplication.Services
         }
         public List<Transaction> GetAccountTransactions(string accountId)
         {
-            return accountService.GetAccountById(accountId)?.Transactions;
+            return dbContext.transaction.ToList().FindAll(tr=>tr.SenderAccountId.EqualInvariant(accountId) || tr.ReceiverAccountId.EqualInvariant(accountId));
         }
         public List<Transaction> GetTransactions(Bank bank)
         {
@@ -85,12 +85,12 @@ namespace BankingApplication.Services
         }
         public bool AddNewCurrency(Bank bank, string newCurrencyName, decimal exchangeRate)
         {
-            if (bank.SupportedCurrency.Any(c => c.Name.EqualInvariant(newCurrencyName)))
+            if (dbContext.currency.ToList().Any(c => c.BankId.EqualInvariant(bank.BankId)&& c.Name.EqualInvariant(newCurrencyName)))
             {
                 return false;
             }
-            bank.SupportedCurrency.Add(new Currency(newCurrencyName, exchangeRate,bank.BankId));
-            JsonFileHelper.WriteData(RBIStorage.banks);
+            dbContext.currency.Add(new Currency(newCurrencyName, exchangeRate,bank.BankId));
+            dbContext.SaveChanges();
             return true;
         }
         public void UpdateAccount(Customer customer)
@@ -133,7 +133,8 @@ namespace BankingApplication.Services
                 }
                 isModified = true;
             }
-            JsonFileHelper.WriteData(RBIStorage.banks);
+            dbContext.bank.Update(bank);
+            dbContext.SaveChanges();
             return isModified;
         }
        
@@ -143,24 +144,20 @@ namespace BankingApplication.Services
             if (transaction.Type == TransactionType.Credit)
             {
                 accountService.WithdrawAmount(userAccount, transaction.TransactionAmount);
-                userAccount.Transactions.Remove(transaction);
+                dbContext.transaction.Remove(transaction);
             }
             else if (transaction.Type == TransactionType.Debit)
             {
                 accountService.DepositAmount(userAccount, transaction.TransactionAmount, bank.SupportedCurrency.FirstOrDefault(c => c.Name.EqualInvariant(bank.DefaultCurrencyName)));
-                userAccount.Transactions.Remove(transaction);
+                dbContext.transaction.Remove(transaction);
             }
             else if (transaction.Type == TransactionType.Transfer)
             {
                 Account receiverAccount = accountService.GetAccountById(transaction.ReceiverAccountId);
                 accountService.WithdrawAmount(receiverAccount, transaction.TransactionAmount);
-                receiverAccount.Transactions.Remove(transaction);
                 accountService.DepositAmount(userAccount, transaction.TransactionAmount, bank.SupportedCurrency.FirstOrDefault(c=>c.Name.EqualInvariant(bank.DefaultCurrencyName)));
-                userAccount.Transactions.Remove(transaction);
-
-
             }
-            JsonFileHelper.WriteData(RBIStorage.banks);
+            dbContext.SaveChanges();
             return true;
 
         }

@@ -8,14 +8,17 @@ namespace BankingApplication.CLI
 {
     public class AccountHolderPage
     {
-        static IAccountService accountService;
-        static IBankService bankService;
-        static Program program;
+        private readonly IAccountService accountService;
+        private readonly IBankService bankService;
+        private readonly Program program;
+        private readonly BankAppDbContext dbContext;
+
         public AccountHolderPage()
         {
             accountService = Factory.CreateAccountService();
             bankService = Factory.CreateBankService();
             program = new Program();
+            dbContext = Factory.CreateBankAppDbContext();
         }
         public void CustomerInterface()
         {
@@ -65,7 +68,8 @@ namespace BankingApplication.CLI
                     break;
                 case AccountHolderMenu.PrintStatement:
                     Console.WriteLine(Constant.transactionHistoryHeader);
-                    UserOutput.ShowTransactions(SessionContext.Account.Transactions);
+                    List<Transaction> transactions = dbContext.transaction.ToList().FindAll(t=>t.SenderAccountId.EqualInvariant(SessionContext.Account.AccountId) || t.ReceiverAccountId.EqualInvariant(SessionContext.Account.AccountId));
+                    UserOutput.ShowTransactions(transactions);
                     break;
                 case AccountHolderMenu.CheckBalance:
                     Console.WriteLine($"\nCurrent Balance - {SessionContext.Account.Balance} {SessionContext.Bank.DefaultCurrencyName}\n");
@@ -87,7 +91,7 @@ namespace BankingApplication.CLI
             if (amount > 0)
             {
                 string Name = UserInput.GetInputValue(Constant.currencyName);
-                Currency currency = SessionContext.Bank.SupportedCurrency.FirstOrDefault(c => c.Name.EqualInvariant(Name));
+                Currency currency = dbContext.currency.ToList().FirstOrDefault(c => c.Name.EqualInvariant(Name) && c.BankId.EqualInvariant(SessionContext.Bank.BankId));
                 if (currency != null)
                 {
                     accountService.DepositAmount(SessionContext.Account, amount, currency);

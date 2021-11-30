@@ -63,7 +63,7 @@ namespace BankingApplication.Models
         public static string newCurrencyName = "new currency name";
         public static string currencyName = "Currency Name";
         public static string newExchangeRate = "exchange rate";
-        public static string currencyAdded = "exchange rate";
+        public static string currencyAdded = "Currency has been added successfully!!";
         public static string newChargeValue = "New Charge Value:";
         public static string transactionId = "Transaction Id";
         public static string amountToDeposit = "amount to deposit";

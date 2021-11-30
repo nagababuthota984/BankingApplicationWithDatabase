@@ -37,7 +37,7 @@ namespace BankingApplication.Models
         public Employee(string name, int age, DateTime dob, Gender gender, EmployeeDesignation role, Bank bank)
         {
             this.Name = name;
-            this.Age = Age;
+            this.Age = age;
             this.Dob = dob;
             this.Gender = gender;
             this.BankId = bank.BankId;

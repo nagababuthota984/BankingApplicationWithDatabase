@@ -22,7 +22,7 @@ namespace BankingApplication.Services
 
         public bool IsValidCustomer(string userName, string password)
         {
-            Account acc = dbContext.account.FirstOrDefault(x => x.UserName.EqualInvariant(userName) && x.Password.EqualInvariant(password));
+            Account acc = dbContext.account.ToList().FirstOrDefault(x => x.UserName.EqualInvariant(userName) && x.Password.EqualInvariant(password));
             if (acc == null)
                 return false;
             else
@@ -57,12 +57,14 @@ namespace BankingApplication.Services
             amount *= currency.ExchangeRate;
             userAccount.Balance += amount;
             transService.CreateTransaction(userAccount, TransactionType.Credit, amount, currency.Name);
+            dbContext.account.Update(userAccount);
             dbContext.SaveChanges();
         }
         public void WithdrawAmount(Account userAccount, decimal amount)
         {
             userAccount.Balance -= amount;
             transService.CreateTransaction(userAccount, TransactionType.Debit, amount, SessionContext.Bank.DefaultCurrencyName);
+            dbContext.account.Update(userAccount);
             dbContext.SaveChanges();
         }
         public void TransferAmount(Account senderAccount, Bank senderBank, Account receiverAccount, decimal amount, ModeOfTransfer mode)
@@ -70,6 +72,8 @@ namespace BankingApplication.Services
             senderAccount.Balance -= amount;
             receiverAccount.Balance += amount;
             ApplyTransferCharges(senderAccount, senderBank, receiverAccount.BankId, amount, mode, SessionContext.Bank.DefaultCurrencyName);
+            dbContext.account.Update(senderAccount);
+            dbContext.account.Update(receiverAccount);
             transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.DefaultCurrencyName);
             dbContext.SaveChanges();
 
@@ -111,6 +115,9 @@ namespace BankingApplication.Services
                     transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currencyName);
                 }
             }
+            dbContext.bank.Update(senderBank);
+            dbContext.account.Update(senderAccount);
+            dbContext.SaveChanges();
         }
     
 

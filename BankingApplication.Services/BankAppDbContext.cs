@@ -1,8 +1,6 @@
 ﻿using BankingApplication.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace BankingApplication.Services
 {
@@ -13,7 +11,8 @@ namespace BankingApplication.Services
         public DbSet<Employee> employee { get; set; }
         public DbSet<Transaction> transaction { get; set; }
         public DbSet<Customer> customer { get; set; }
-        
+        public DbSet<Currency> currency { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(connectionString: "Data Source=NAG1211-HP-LAPT\\SQLEXPRESS;Initial Catalog=BankStore;Integrated Security=True");
