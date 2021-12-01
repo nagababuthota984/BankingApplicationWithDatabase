@@ -43,12 +43,12 @@ namespace BankingApplication.Services
         
         public Account GetAccountByAccNumber(string accNumber)
         {
-            return dbContext.account.FirstOrDefault(ac=>ac.AccountNumber.EqualInvariant(accNumber));
+            return dbContext.account.ToList().FirstOrDefault(ac=>ac.AccountNumber.EqualInvariant(accNumber));
         }
 
         public Account GetAccountById(string accountId)
         {
-            return dbContext.account.FirstOrDefault(ac=>ac.AccountNumber.EqualInvariant(accountId));
+            return dbContext.account.ToList().FirstOrDefault(ac=>ac.AccountId.EqualInvariant(accountId));
         }
 
 

@@ -28,7 +28,8 @@ namespace BankingApplication.Models
         public Account(Customer customer, AccountType type,Bank bank, List<Account> accounts)
         {
             this.Customer = customer;
-            this.UserName = $"{customer.Name}{customer.Dob:yyyy}";
+            string nameTrimmed = String.Concat(customer.Name.Where(c => !Char.IsWhiteSpace(c)));
+            this.UserName = $"{nameTrimmed.Substring(0,4)}{customer.Dob:yyyy}{DateTime.Now:ffff}";
             this.Password = $"{customer.Dob:yyyyMMdd}";
             this.AccountId = $"{customer.Name[..3]}{customer.Dob:yyyyMMdd}";
             this.Customer.AccountId = this.AccountId;

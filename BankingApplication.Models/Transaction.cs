@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace BankingApplication.Models
@@ -11,9 +12,13 @@ namespace BankingApplication.Models
         [Key]
         public string TransId { get; set; }
         public TransactionType Type { get; set; }
+        [ForeignKey("Account")]
         public string SenderAccountId { get; set; }
+        [ForeignKey("Account")]
         public string ReceiverAccountId { get; set; }
+        [ForeignKey("Bank")]
         public string SenderBankId { get; set; }
+        [ForeignKey("Bank")]
         public string ReceiverBankId { get; set; }
         public DateTime On { get; set; }
         public decimal TransactionAmount { get; set; }

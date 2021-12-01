@@ -35,7 +35,6 @@ namespace BankingApplication.CLI
                 }
                 else
                 {
-                    SessionContext.Bank = bankService.GetBankById(SessionContext.Account.BankId);
                     CustomerInterface();
                 }
             }
@@ -79,7 +78,6 @@ namespace BankingApplication.CLI
                     SessionContext.Bank = null;
                     program.WelcomeMenu();
                     return;
-
             }
             AccountHolderActions();
         }

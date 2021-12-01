@@ -144,18 +144,16 @@ namespace BankingApplication.Services
             if (transaction.Type == TransactionType.Credit)
             {
                 accountService.WithdrawAmount(userAccount, transaction.TransactionAmount);
-                dbContext.transaction.Remove(transaction);
             }
             else if (transaction.Type == TransactionType.Debit)
             {
-                accountService.DepositAmount(userAccount, transaction.TransactionAmount, bank.SupportedCurrency.FirstOrDefault(c => c.Name.EqualInvariant(bank.DefaultCurrencyName)));
-                dbContext.transaction.Remove(transaction);
+                accountService.DepositAmount(userAccount, transaction.TransactionAmount, dbContext.currency.ToList().FirstOrDefault(c => c.Name.EqualInvariant(bank.DefaultCurrencyName)));
             }
             else if (transaction.Type == TransactionType.Transfer)
             {
                 Account receiverAccount = accountService.GetAccountById(transaction.ReceiverAccountId);
                 accountService.WithdrawAmount(receiverAccount, transaction.TransactionAmount);
-                accountService.DepositAmount(userAccount, transaction.TransactionAmount, bank.SupportedCurrency.FirstOrDefault(c=>c.Name.EqualInvariant(bank.DefaultCurrencyName)));
+                accountService.DepositAmount(userAccount, transaction.TransactionAmount, dbContext.currency.ToList().FirstOrDefault(c => c.Name.EqualInvariant(bank.DefaultCurrencyName)));
             }
             dbContext.SaveChanges();
             return true;

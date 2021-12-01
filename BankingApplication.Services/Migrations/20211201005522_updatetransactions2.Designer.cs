@@ -4,14 +4,16 @@ using BankingApplication.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BankingApplication.Services.Migrations
 {
     [DbContext(typeof(BankAppDbContext))]
-    partial class BankAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211201005522_updatetransactions2")]
+    partial class updatetransactions2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
