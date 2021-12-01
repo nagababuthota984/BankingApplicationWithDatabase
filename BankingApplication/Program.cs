@@ -8,8 +8,8 @@ namespace BankingApplication.CLI
 
     class Program
     {
-        private static AccountHolderPage accountHolderPage;
-        private static BankEmployeePage employeePage;
+        private  AccountHolderPage accountHolderPage;
+        private  BankEmployeePage employeePage;
         public static void Main()
         {
             

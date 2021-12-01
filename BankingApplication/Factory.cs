@@ -21,10 +21,7 @@ namespace BankingApplication.CLI
         {
             return new TransactionService(CreateBankAppDbContext());
         }
-        public static JsonFileHelper CreateJsonFileHelperService()
-        {
-            return new JsonFileHelper();
-        }
+       
         public static BankAppDbContext CreateBankAppDbContext()
         {
             return new BankAppDbContext();

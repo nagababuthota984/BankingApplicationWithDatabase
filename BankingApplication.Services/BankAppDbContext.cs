@@ -24,6 +24,8 @@ namespace BankingApplication.Services
             modelBuilder.Entity<Bank>().ToTable("bank")
                 .HasData(new Bank { BankId = "Axi20211024", BankName = "AxisBank", Branch = "Guntur", Ifsc = "UBIN0000261", SelfRTGS = 0, SelfIMPS = 5, OtherRTGS = 2, OtherIMPS = 6, DefaultCurrencyName = "INR" },
                          new Bank { BankId= "Sta20211026",BankName= "StateBankOfIndia",Branch="Guntur",Ifsc= "SBIN000232",SelfRTGS=0,SelfIMPS=5,OtherRTGS=2,OtherIMPS=6,DefaultCurrencyName="INR" });
+            
+            
             modelBuilder.Entity<Currency>().ToTable("Currency")
                .HasData(new Currency("INR", 1, "Axi20211024"),
                         new Currency("INR",1, "Sta20211026"));

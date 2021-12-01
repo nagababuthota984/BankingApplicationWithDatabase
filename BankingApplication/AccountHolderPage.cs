@@ -88,8 +88,8 @@ namespace BankingApplication.CLI
             decimal amount = UserInput.GetDecimalInput(Constant.amountToDeposit);
             if (amount > 0)
             {
-                string Name = UserInput.GetInputValue(Constant.currencyName);
-                Currency currency = dbContext.currency.ToList().FirstOrDefault(c => c.Name.EqualInvariant(Name) && c.BankId.EqualInvariant(SessionContext.Bank.BankId));
+                string name = UserInput.GetInputValue(Constant.currencyName);
+                Currency currency = dbContext.currency.ToList().FirstOrDefault(c => c.Name.EqualInvariant(name) && c.BankId.EqualInvariant(SessionContext.Bank.BankId));
                 if (currency != null)
                 {
                     accountService.DepositAmount(SessionContext.Account, amount, currency);
