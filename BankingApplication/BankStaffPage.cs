@@ -113,6 +113,16 @@ namespace BankingApplication.CLI
         private void CreateAccountInterface()
         {
             Console.WriteLine(Constant.accountCreationHeader);
+            Customer newCustomer = GetDetailsOfNewCustomer();
+            AccountType accountType = (AccountType)UserInput.GetIntegerInput(Constant.accountTypeOptions);
+            Account newAccount = new Account(newCustomer, accountType,SessionContext.Bank, dbContext.account.ToList());
+            bankService.CreateAndAddAccount(newAccount, SessionContext.Bank);
+            newCustomer.CustomerId = newAccount.AccountId;
+            UserOutput.ShowMessage($"Account has been created!\nCredentials:Username - {newAccount.UserName}\nPassword - {newAccount.Password}\nAccount Number - {newAccount.AccountNumber}\n");
+        }
+
+        private Customer GetDetailsOfNewCustomer()
+        {
             string name = GetName();
             int age = GetAge();
             Gender gender = GetGenderByInput(UserInput.GetIntegerInput(Constant.genderOptions));
@@ -121,13 +131,10 @@ namespace BankingApplication.CLI
             long aadharNumber = UserInput.GetLongInput(Constant.aadharNumber);
             string panNumber = GetPanNumber();
             string address = UserInput.GetInputValue(Constant.address);
-            AccountType accountType = (AccountType)UserInput.GetIntegerInput(Constant.accountTypeOptions);
             Customer newCustomer = new Customer(name, age, gender, dob, contactNumber, aadharNumber, panNumber, address);
-            Account newAccount = new Account(newCustomer, accountType,SessionContext.Bank, dbContext.account.ToList());
-            bankService.CreateAndAddAccount(newAccount, SessionContext.Bank);
-            newCustomer.CustomerId = newAccount.AccountId;
-            UserOutput.ShowMessage($"Account has been created!\nCredentials:Username - {newAccount.UserName}\nPassword - {newAccount.Password}\nAccount Number - {newAccount.AccountNumber}\n");
+            return newCustomer;
         }
+
         private void AddBankInterface()
         {
             Console.WriteLine(Constant.addBankHeader);
@@ -241,13 +248,10 @@ namespace BankingApplication.CLI
         private void AddNewEmployeeInterface()
         {
             Console.WriteLine(Constant.addNewEmployeeHeader);
-            string name = GetName();
-            int age = GetAge();
-            DateTime dob = GetDateTimeInput((UserInput.GetInputValue(Constant.dateOfBirth)));
-            Gender gender = GetGenderByInput(UserInput.GetIntegerInput(Constant.genderOptions));
+            Customer newCustomer = GetDetailsOfNewCustomer();
             EmployeeDesignation role = (EmployeeDesignation)UserInput.GetIntegerInput(Constant.designationOptions);
-            Employee newEmployee = bankService.CreateAndGetEmployee(name, age, dob, gender, role, SessionContext.Bank);
-            UserOutput.ShowMessage($"Employee {newEmployee.Name} has been added! Credentials:\n{newEmployee.UserName}\n{newEmployee.Password}\n");
+            Employee newEmployee = bankService.CreateAndGetEmployee(newCustomer, role, SessionContext.Bank);
+            UserOutput.ShowMessage($"Employee {newEmployee.customer.Name} has been added! Credentials:\n{newEmployee.UserName}\n{newEmployee.Password}\n");
         }
         private void AddNewCurrencyInterface()
         {

@@ -23,9 +23,10 @@ namespace BankingApplication.Services
             dbContext.SaveChanges();
             return newBank;
         }
-        public Employee CreateAndGetEmployee(string name, int age, DateTime dob, Gender gender, EmployeeDesignation role, Bank bank)
+        public Employee CreateAndGetEmployee(Customer newCustomer,EmployeeDesignation role, Bank bank)
         {
-            Employee employee = new Employee(name, age, dob, gender, role, bank);
+            Employee employee = new Employee(newCustomer,role, bank);
+            dbContext.customer.Add(newCustomer);
             dbContext.employee.Add(employee);
             dbContext.SaveChanges();
             return employee;
@@ -52,6 +53,7 @@ namespace BankingApplication.Services
         {
             newAccount.BankId = bank.BankId;
             dbContext.account.Add(newAccount);
+            dbContext.customer.Add(newAccount.Customer);
             dbContext.SaveChanges();
         }
         

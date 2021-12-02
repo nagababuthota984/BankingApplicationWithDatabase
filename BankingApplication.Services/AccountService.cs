@@ -32,26 +32,20 @@ namespace BankingApplication.Services
             }
 
         }
-
         private void PrepareCustomerSessionContext(Account acc)
         {
 
             SessionContext.Account = acc;
             SessionContext.Bank = dbContext.bank.ToList().FirstOrDefault(b=>b.BankId.EqualInvariant(acc.BankId)); 
         }
-
-        
         public Account GetAccountByAccNumber(string accNumber)
         {
             return dbContext.account.ToList().FirstOrDefault(ac=>ac.AccountNumber.EqualInvariant(accNumber));
         }
-
         public Account GetAccountById(string accountId)
         {
             return dbContext.account.ToList().FirstOrDefault(ac=>ac.AccountId.EqualInvariant(accountId));
         }
-
-
         public void DepositAmount(Account userAccount, decimal amount, Currency currency)
         {
             amount *= currency.ExchangeRate;
