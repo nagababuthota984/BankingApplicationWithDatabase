@@ -39,7 +39,7 @@ namespace BankAppDbFirstApproach.Services
         }
         public bool IsValidEmployee(string userName, string password)
         {
-            Employee emp = dbContext.Employees.Where(e => e.username == userName && e.password == password).FirstOrDefault();
+            Employee emp = dbContext.Employees.ToList().FirstOrDefault(e => e.username.EqualInvariant(userName) && e.password.EqualInvariant(password)); ;
             if (emp == null)
                 return false;
             else
@@ -66,7 +66,7 @@ namespace BankAppDbFirstApproach.Services
         
         public Bank GetBankById(string bankId)
         {
-            return dbContext.Banks.FirstOrDefault(b => b.bankId.Equals(bankId));
+            return dbContext.Banks.ToList().FirstOrDefault(b => b.bankId.EqualInvariant(bankId));
         }
         public List<Transaction> GetTransactionsByDate(DateTime date, Bank bank)
         {

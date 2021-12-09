@@ -1,10 +1,5 @@
 ﻿using BankAppDbFirstApproach.Models;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Reflection;
+
 
 namespace BankAppDbFirstApproach.Services
 {
@@ -22,7 +17,7 @@ namespace BankAppDbFirstApproach.Services
 
         public bool IsValidCustomer(string userName, string password)
         {
-            Account acc = dbContext.Accounts.FirstOrDefault(acc => acc.username.Equals(userName) && acc.password.Equals(password) && acc.status == (int)AccountStatus.Active);
+            Account acc = dbContext.Accounts.ToList().FirstOrDefault(acc => acc.username.EqualInvariant(userName) && acc.password.EqualInvariant(password) && acc.status == (int)AccountStatus.Active);
             if (acc == null)
                 return false;
             else
@@ -36,15 +31,15 @@ namespace BankAppDbFirstApproach.Services
         {
 
             SessionContext.Account = acc;
-            SessionContext.Bank = dbContext.Banks.FirstOrDefault(b=>b.bankId.Equals(acc.bankId)); 
+            SessionContext.Bank = dbContext.Banks.ToList().FirstOrDefault(b=>b.bankId.EqualInvariant(acc.bankId)); 
         }
         public Account GetAccountByAccNumber(string accNumber)
         {
-            return dbContext.Accounts.FirstOrDefault(ac=>ac.accountNumber.Equals(accNumber));
+            return dbContext.Accounts.ToList().FirstOrDefault(ac=>ac.accountNumber.EqualInvariant(accNumber));
         }
         public Account GetAccountById(string accountId)
         {
-            return dbContext.Accounts.FirstOrDefault(ac=>ac.accountId.Equals(accountId));
+            return dbContext.Accounts.ToList().FirstOrDefault(ac=>ac.accountId.EqualInvariant(accountId));
         }
         public void DepositAmount(Account userAccount, decimal amount, Currency currency)
         {
@@ -64,8 +59,6 @@ namespace BankAppDbFirstApproach.Services
             senderAccount.balance -= amount;
             receiverAccount.balance += amount;
             ApplyTransferCharges(senderAccount, senderBank, receiverAccount.bankId, amount, mode, SessionContext.Bank.defaultCurrencyName);
-            //dbContext.Accounts.Update(senderAccount);
-            //dbContext.Accounts.Update(receiverAccount);
             transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.defaultCurrencyName);
             dbContext.SaveChanges();
 
@@ -107,8 +100,6 @@ namespace BankAppDbFirstApproach.Services
                     transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currencyName);
                 }
             }
-            //dbContext.Banks.Update(senderBank);
-            //dbContext.account.Update(senderAccount);
             dbContext.SaveChanges();
         }
     

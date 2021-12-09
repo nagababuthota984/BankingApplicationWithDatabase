@@ -67,7 +67,7 @@ namespace BankAppDbFirstApproach.CLI
                     break;
                 case AccountHolderMenu.PrintStatement:
                     Console.WriteLine(Constant.transactionHistoryHeader);
-                    List<Transaction> transactions = dbContext.Transactions.Where(t=>t.accountId.Equals(SessionContext.Account.accountId)).ToList();
+                    List<Transaction> transactions = dbContext.Transactions.ToList().FindAll(t=>t.accountId.Equals(SessionContext.Account.accountId));
                     UserOutput.ShowTransactions(transactions);
                     break;
                 case AccountHolderMenu.CheckBalance:
@@ -89,7 +89,7 @@ namespace BankAppDbFirstApproach.CLI
             if (amount > 0)
             {
                 string name = UserInput.GetInputValue(Constant.currencyName);
-                Currency currency = dbContext.Currencies.FirstOrDefault(c => c.name.Equals(name) && c.bankId.Equals(SessionContext.Bank.bankId));
+                Currency currency = dbContext.Currencies.ToList().FirstOrDefault(c => c.name.EqualInvariant(name) && c.bankId.EqualInvariant(SessionContext.Bank.bankId));
                 if (currency != null)
                 {
                     accountService.DepositAmount(SessionContext.Account, amount, currency);

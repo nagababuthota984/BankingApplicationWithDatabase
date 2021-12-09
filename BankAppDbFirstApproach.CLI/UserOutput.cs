@@ -8,12 +8,6 @@ namespace BankAppDbFirstApproach.CLI
     public class UserOutput
     {
         
-        
-        public static void ErrorMessage(string Message)
-        {
-            Console.WriteLine(Message);
-        }
-        
         public static void ShowTransactions(List<Transaction> Transactions)
         {
             int count = 1;
@@ -25,7 +19,7 @@ namespace BankAppDbFirstApproach.CLI
                 Console.WriteLine("-----------------------------------------------------------------------------------------------");
                 foreach (Transaction trans in Transactions)
                 {
-                    string output = $"{count,5}|{trans.transId,19}   |{trans.transactionType,7}|{trans.transactionAmount,7}|{trans.balance,10}|{trans.transactionOn}";
+                    string output = $"{count,5}|{trans.transId,19}   |{(TransactionType)trans.transactionType,7}|{trans.transactionAmount,7}|{trans.balance,10}|{trans.transactionOn}";
                     Console.WriteLine(output);
                     count++;
                     Console.WriteLine();

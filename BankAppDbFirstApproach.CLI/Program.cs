@@ -10,6 +10,7 @@ namespace BankAppDbFirstApproach.CLI
     {
         private  AccountHolderPage accountHolderPage;
         private  BankEmployeePage employeePage;
+        private IServiceProvider container;
         public static void Main()
         {
             
@@ -21,6 +22,7 @@ namespace BankAppDbFirstApproach.CLI
         {
             accountHolderPage = new AccountHolderPage();
             employeePage = new BankEmployeePage();
+            container = new DependencyInjector().Build();
             WelcomeMenu();
         }
 

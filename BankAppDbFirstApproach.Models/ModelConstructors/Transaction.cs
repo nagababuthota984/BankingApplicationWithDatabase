@@ -13,7 +13,7 @@ namespace BankAppDbFirstApproach.Models
 
         }
 
-        //Normal transaction
+        //Normal Debit,Credit transaction
         public Transaction(Account userAccount, TransactionType type, decimal transactionAmount, string currencyName, bool isServiceCharge)
         {
             DateTime timestamp = DateTime.Now;
