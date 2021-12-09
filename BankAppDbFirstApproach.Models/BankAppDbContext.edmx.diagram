@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="377c2184e78d4858988c9b66d2a95a44" Name="Diagram1">
+        <EntityTypeShape EntityType="BankStorageModel.Account" Width="1.5" PointX="3" PointY="3" IsExpanded="true" />
+        <EntityTypeShape EntityType="BankStorageModel.Bank" Width="1.5" PointX="0.75" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="BankStorageModel.Currency" Width="1.5" PointX="3" PointY="6.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="BankStorageModel.Customer" Width="1.5" PointX="3.75" PointY="10.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="BankStorageModel.Employee" Width="1.5" PointX="6" PointY="7.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="BankStorageModel.Transaction" Width="1.5" PointX="8.375" PointY="2.5" IsExpanded="true" />
+        <AssociationConnector Association="BankStorageModel.FK__account__bankId__4222D4EF" ManuallyRouted="false" />
+        <AssociationConnector Association="BankStorageModel.FK__transacti__accou__47DBAE45" ManuallyRouted="false" />
+        <AssociationConnector Association="BankStorageModel.FK__currency__bankId__3A81B327" ManuallyRouted="false" />
+        <AssociationConnector Association="BankStorageModel.FK__employee__bankId__3E52440B" ManuallyRouted="false" />
+        <AssociationConnector Association="BankStorageModel.FK_employee_customer" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="BankStorageModel.C__EFMigrationsHistory" Width="1.5" PointX="0.75" PointY="0.75" />
+        <AssociationConnector Association="BankStorageModel.FK_account_customer" />
+        <AssociationConnector Association="BankStorageModel.Fk_transaction_bank" />
+        <AssociationConnector Association="BankStorageModel.FK__Transacti__other__6E01572D" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
