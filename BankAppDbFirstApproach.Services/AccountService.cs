@@ -56,11 +56,21 @@ namespace BankAppDbFirstApproach.Services
         }
         public void TransferAmount(Account senderAccount, Bank senderBank, Account receiverAccount, decimal amount, ModeOfTransfer mode)
         {
-            senderAccount.balance -= amount;
-            receiverAccount.balance += amount;
-            ApplyTransferCharges(senderAccount, senderBank, receiverAccount.bankId, amount, mode, SessionContext.Bank.defaultCurrencyName);
-            transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.defaultCurrencyName);
-            dbContext.SaveChanges();
+
+            try
+            {
+                senderAccount.balance -= amount;
+                receiverAccount.balance += amount;
+
+                ApplyTransferCharges(senderAccount, senderBank, receiverAccount.bankId, amount, mode, SessionContext.Bank.defaultCurrencyName);
+                transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.defaultCurrencyName);
+                dbContext.SaveChanges();
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.InnerException.Message+e.InnerException.StackTrace);
+            }
 
         }
         public void ApplyTransferCharges(Account senderAccount, Bank senderBank, string receiverBankId, decimal amount, ModeOfTransfer mode, string currencyName)

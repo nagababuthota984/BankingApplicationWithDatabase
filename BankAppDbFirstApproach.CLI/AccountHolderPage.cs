@@ -3,6 +3,7 @@ using System;
 using BankAppDbFirstApproach.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.Entity;
 
 namespace BankAppDbFirstApproach.CLI
 {
@@ -15,10 +16,10 @@ namespace BankAppDbFirstApproach.CLI
 
         public AccountHolderPage()
         {
-            accountService = Factory.CreateAccountService();
-            bankService = Factory.CreateBankService();
+            accountService = Factory.GetService<IAccountService>();
+            bankService = Factory.GetService<IBankService>();
             program = new Program();
-            dbContext = Factory.CreateBankAppDbContext();
+            dbContext = Factory.GetService<BankStorageEntities>();
         }
         public void CustomerInterface()
         {

@@ -3,17 +3,18 @@ using System;
 using BankAppDbFirstApproach.Models;
 using System.Linq;
 
+
 namespace BankAppDbFirstApproach.CLI
 {
 
     class Program
     {
-        private  AccountHolderPage accountHolderPage;
-        private  BankEmployeePage employeePage;
-        private IServiceProvider container;
+        private AccountHolderPage accountHolderPage;
+        private BankEmployeePage employeePage;
+        public static IServiceProvider container;
         public static void Main()
         {
-            
+            container = DependencyInjector.Build();
             Program p = new Program();
             p.InitializeUI();
         }
@@ -22,7 +23,6 @@ namespace BankAppDbFirstApproach.CLI
         {
             accountHolderPage = new AccountHolderPage();
             employeePage = new BankEmployeePage();
-            container = new DependencyInjector().Build();
             WelcomeMenu();
         }
 

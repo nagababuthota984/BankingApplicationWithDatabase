@@ -8,23 +8,17 @@ namespace BankAppDbFirstApproach.CLI
 {
     public static class Factory
     {
-        public static IAccountService CreateAccountService()
+        public static T GetService<T>()
         {
-            return new AccountService(CreateTransactionService(),CreateBankAppDbContext());
+            return (T)Program.container.GetService(typeof(T));
         }
-        public static IBankService CreateBankService()
-        {
-            return new BankService(CreateAccountService(),CreateBankAppDbContext());
-        }
-        public static ITransactionService CreateTransactionService()
-        {
-            return new TransactionService(CreateBankAppDbContext());
-        }
-       
         public static BankStorageEntities CreateBankAppDbContext()
         {
             return new BankStorageEntities();
         }
+
+
+
 
     }
 }

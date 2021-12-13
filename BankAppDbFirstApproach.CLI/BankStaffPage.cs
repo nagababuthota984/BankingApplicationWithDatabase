@@ -1,6 +1,6 @@
 ﻿using BankAppDbFirstApproach.Models;
 using BankAppDbFirstApproach.Services;
-
+using System.Data.Entity;
 
 namespace BankAppDbFirstApproach.CLI
 {
@@ -13,11 +13,11 @@ namespace BankAppDbFirstApproach.CLI
         private readonly BankStorageEntities dbContext;
         public BankEmployeePage()
         {
-            bankService = Factory.CreateBankService();
-            accountService = Factory.CreateAccountService();
-            transactionService = Factory.CreateTransactionService();
+            bankService = Factory.GetService<IBankService>();
+            accountService = Factory.GetService<IAccountService>();
+            transactionService = Factory.GetService<ITransactionService>();
             program = new Program();
-            dbContext = Factory.CreateBankAppDbContext();
+            dbContext = Factory.GetService<BankStorageEntities>();
         }
         public void EmployeeInterface()
         {

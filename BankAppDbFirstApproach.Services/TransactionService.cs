@@ -23,9 +23,9 @@ namespace BankAppDbFirstApproach.Services
             Transaction senderTransaction = new Transaction(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currencyName, mode);
             dbContext.Transactions.Add(senderTransaction);
             Transaction receiverTransaction = new Transaction(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currencyName, mode);
+            receiverTransaction.accountId = receiverAccount.accountId;
             receiverTransaction.balance = receiverAccount.balance;
             dbContext.Transactions.Add(receiverTransaction);
-            dbContext.SaveChanges();
 
         }
         public void CreateAndAddBankTransaction(Bank bank, Account userAccount, decimal charges, string currencyName)
