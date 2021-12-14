@@ -48,13 +48,11 @@ namespace BankAppDbFirstApproach.Services
                 return true;
             }
         }
-
         private void PrepareEmployeeSessionContext(Employee emp)
         {
             SessionContext.Employee = emp;
             SessionContext.Bank = GetBankById(emp.bankId);
         }
-
         public void CreateAndAddAccount(Account newAccount,Customer newCustomer, Bank bank)
         {
             newAccount.bankId = bank.bankId;
@@ -63,7 +61,6 @@ namespace BankAppDbFirstApproach.Services
             dbContext.Customers.Add(newCustomer);
             dbContext.SaveChanges();
         }
-        
         public Bank GetBankById(string bankId)
         {
             return dbContext.Banks.ToList().FirstOrDefault(b => b.bankId.EqualInvariant(bankId));
@@ -94,8 +91,6 @@ namespace BankAppDbFirstApproach.Services
             dbContext.SaveChanges();
             return true;
         }
-       
-
         public bool DeleteAccount(Account userAccount)
         {
             userAccount.status = (int)AccountStatus.Closed;
@@ -152,11 +147,7 @@ namespace BankAppDbFirstApproach.Services
             }
             dbContext.SaveChanges();
             return true;
-
         }
-       
-        
-        
     }
 }
 

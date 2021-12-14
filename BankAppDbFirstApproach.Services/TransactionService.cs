@@ -11,7 +11,6 @@ namespace BankAppDbFirstApproach.Services
         {
             dbContext = context;    
         }
-
         public void CreateTransaction(Account userAccount, TransactionType transtype, decimal transactionamount, string currencyName)
         {
             Transaction newTransaction = new Transaction(userAccount, transtype, transactionamount, currencyName,false);
@@ -26,7 +25,7 @@ namespace BankAppDbFirstApproach.Services
             receiverTransaction.accountId = receiverAccount.accountId;
             receiverTransaction.balance = receiverAccount.balance;
             dbContext.Transactions.Add(receiverTransaction);
-
+            dbContext.SaveChanges();
         }
         public void CreateAndAddBankTransaction(Bank bank, Account userAccount, decimal charges, string currencyName)
         {
@@ -40,7 +39,5 @@ namespace BankAppDbFirstApproach.Services
         {
             return dbContext.Transactions.FirstOrDefault(tr=>tr.transId.Equals(transactionId));
         }
-
-
     }
 }

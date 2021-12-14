@@ -25,7 +25,6 @@ namespace BankAppDbFirstApproach.CLI
             string userName = UserInput.GetUserName();
             string password = UserInput.GetPassword();
             Console.WriteLine();
-
             if (!bankService.IsValidEmployee(userName, password))
             {
                 UserOutput.ShowMessage(Constant.invalidCredentialsError);
@@ -90,7 +89,6 @@ namespace BankAppDbFirstApproach.CLI
             }
             EmployeeActions();
         }
-
         private void ViewTransactionsInterface()
         {
             Console.WriteLine(Constant.viewTransactionsHeader);
@@ -107,7 +105,6 @@ namespace BankAppDbFirstApproach.CLI
                     return;
             }
         }
-
         private void CreateAccountInterface()
         {
             Console.WriteLine(Constant.accountCreationHeader);
@@ -117,7 +114,6 @@ namespace BankAppDbFirstApproach.CLI
             bankService.CreateAndAddAccount(newAccount,newCustomer , SessionContext.Bank);
             UserOutput.ShowMessage($"Account has been created!\nCredentials:Username - {newAccount.username}\nPassword - {newAccount.password}\nAccount Number - {newAccount.accountNumber}\n");
         }
-
         private Customer GetDetailsOfNewCustomer()
         {
             string name = GetName();
@@ -131,7 +127,6 @@ namespace BankAppDbFirstApproach.CLI
             Customer newCustomer = new Customer(name, age, gender, dob, contactNumber, aadharNumber, panNumber, address);
             return newCustomer;
         }
-
         private void AddBankInterface()
         {
             Console.WriteLine(Constant.addBankHeader);
@@ -459,7 +454,5 @@ namespace BankAppDbFirstApproach.CLI
             return dob;
 
         }
-
-
     }
 }

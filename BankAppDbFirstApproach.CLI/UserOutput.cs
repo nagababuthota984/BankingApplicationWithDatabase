@@ -11,7 +11,6 @@ namespace BankAppDbFirstApproach.CLI
         public static void ShowTransactions(List<Transaction> Transactions)
         {
             int count = 1;
-
             if (Transactions.Count>=1)
             {
                 string heading = "Sno  | Transaction Id\t\t\t\t|  Type  | Amount | Balance | Transaction On";

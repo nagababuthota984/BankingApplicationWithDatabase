@@ -12,13 +12,5 @@ namespace BankAppDbFirstApproach.CLI
         {
             return (T)Program.container.GetService(typeof(T));
         }
-        public static BankStorageEntities CreateBankAppDbContext()
-        {
-            return new BankStorageEntities();
-        }
-
-
-
-
     }
 }

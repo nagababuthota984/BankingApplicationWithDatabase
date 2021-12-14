@@ -25,10 +25,8 @@ namespace BankAppDbFirstApproach.CLI
             employeePage = new BankEmployeePage();
             WelcomeMenu();
         }
-
         public void WelcomeMenu()
         {
-
             Console.WriteLine(Constant.welcomeMessage);
             try
             {
@@ -47,12 +45,10 @@ namespace BankAppDbFirstApproach.CLI
                         break;
                 }
             }
-
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
-
         }
         public static MainMenu GetMainMenuByInput(int value)
         {

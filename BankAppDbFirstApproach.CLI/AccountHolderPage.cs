@@ -51,7 +51,6 @@ namespace BankAppDbFirstApproach.CLI
                 }
             }
         }
-
         private void AccountHolderActions()
         {
             switch (UserInput.ShowAccountHolderMenu())
@@ -82,7 +81,6 @@ namespace BankAppDbFirstApproach.CLI
             }
             AccountHolderActions();
         }
-
         private void DepositInterface()
         {
             Console.WriteLine(Constant.moneyDepositHeader);

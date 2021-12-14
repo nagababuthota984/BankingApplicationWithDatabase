@@ -11,15 +11,19 @@ namespace BankAppDbFirstApproach.CLI
             Console.WriteLine("Please Enter {0}", property);
             return Console.ReadLine();
         }
-
         public static AccountHolderMenu ShowAccountHolderMenu()
         {
             Console.WriteLine(Constant.customerMenuHeader);
             Console.WriteLine(Constant.accountHolderOptions);
             Console.WriteLine("==================================================\n");
-            return GetAccountHolderMenuByInteger(Convert.ToInt32(Console.ReadLine()));
+            if(Int32.TryParse(Console.ReadLine(),out int result))
+                return GetAccountHolderMenuByInteger(result);
+            else
+            {
+                Console.WriteLine("Invalid input. Please enter a valid integer value.");
+                return ShowAccountHolderMenu();
+            }
         }
-
         internal static string GetPassword()
         {
             Console.WriteLine("Please enter your password");
@@ -31,7 +35,6 @@ namespace BankAppDbFirstApproach.CLI
             }
             else return password;
         }
-
         internal static string GetUserName()
         {
             Console.WriteLine("Please enter your username");
@@ -43,7 +46,6 @@ namespace BankAppDbFirstApproach.CLI
             }
             else return username;
         }
-
         private static AccountHolderMenu GetAccountHolderMenuByInteger(int value)
         {
             if (value == 1)
@@ -61,7 +63,6 @@ namespace BankAppDbFirstApproach.CLI
             else
                 return AccountHolderMenu.LogOut;
         }
-
         internal static decimal GetDecimalInput(string message)
         {
             Console.WriteLine($"Enter {message}:");
@@ -74,10 +75,7 @@ namespace BankAppDbFirstApproach.CLI
                 Console.WriteLine("\nPlease enter a valid decimal value.\n");
                 return GetDecimalInput(message);
             }
-
-
         }
-
         internal static long GetLongInput(string message)
         {
             Console.WriteLine($"Enter {message}:");
@@ -105,7 +103,5 @@ namespace BankAppDbFirstApproach.CLI
                 return GetIntegerInput(message);
             }
         }
-
-
     }
 }
