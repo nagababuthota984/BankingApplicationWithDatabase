@@ -17,7 +17,7 @@ namespace BankAppDbFirstApproach.Models
         public Transaction(Account userAccount, TransactionType type, decimal transactionAmount, string currencyName, bool isServiceCharge)
         {
             DateTime timestamp = DateTime.Now;
-            this.transId = $"TXN{userAccount.bankId}{userAccount.accountId}{timestamp:yyyyMMddhhmmss}";
+            this.transId = $"TXN{userAccount.bankId}{userAccount.accountId}{timestamp:yyMMddhhmmssfff}";
             this.accountId = userAccount.accountId;
             this.sendername = userAccount.accountId;
             this.receivername = isServiceCharge ? userAccount.bankId : userAccount.accountId;
@@ -36,7 +36,7 @@ namespace BankAppDbFirstApproach.Models
         public Transaction(Account userAccount, Bank bank, TransactionType serviceCharge, decimal charges, string currencyName)
         {
             DateTime timestamp = DateTime.Now;
-            this.transId = $"TXN{userAccount.bankId}{userAccount.accountId}{timestamp:yyyyMMddhhmmss}";
+            this.transId = $"TXN{userAccount.bankId}{userAccount.accountId}{timestamp:yyMMddhhmmssfff}";
             this.accountId = userAccount.accountId;
             this.sendername = userAccount.accountId;
             this.receivername = bank.bankId;
@@ -55,7 +55,7 @@ namespace BankAppDbFirstApproach.Models
         public Transaction(Account userAccount, Account receiverAccount, TransactionType transfer, decimal transactionAmount, string currencyName, ModeOfTransfer mode)
         {
             DateTime timestamp = DateTime.Now;
-            this.transId = $"TXN{userAccount.bankId}{userAccount.accountId}{timestamp:yyyyMMddhhmmss}";
+            this.transId = $"TXN{userAccount.bankId}{userAccount.accountId}{timestamp:yyMMddhhmmssfffff}";
             this.accountId = userAccount.accountId;
             this.sendername = userAccount.accountId;
             this.receivername = receiverAccount.accountId;
