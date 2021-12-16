@@ -79,5 +79,8 @@ namespace BankAppDbFirstApproach.Models
         public static string customerMenuHeader = "\n================CUSTOMER MENU===================";
         public static string invalidUserName = "Invalid Username!\n";
         public static string invalidPassword = "Invalid Password!\n";
+        public static string displayTransactionHeader="Sno  | Transaction Id\t\t\t\t\t   |  Type  \t  | Amount | Balance | Transaction On";
+        public static string lineBreak= "-----------------------------------------------------------------------------------------------------------------";
+        public static string loginSuccess= "\n*********************Logged In**********************\n";
     }
 }

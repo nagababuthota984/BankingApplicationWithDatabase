@@ -10,18 +10,15 @@ namespace BankAppDbFirstApproach.CLI
     public class AccountHolderPage
     {
         private readonly IAccountService accountService;
-        private readonly IBankService bankService;
         private readonly Program program;
         private readonly BankStorageEntities dbContext;
-
-        public AccountHolderPage()
+        public AccountHolderPage(IAccountService accService,BankStorageEntities context,Program programInstance)
         {
-            accountService = Factory.GetService<IAccountService>();
-            bankService = Factory.GetService<IBankService>();
-            program = new Program();
-            dbContext = Factory.GetService<BankStorageEntities>();
+            accountService = accService;
+            program = programInstance;
+            dbContext = context;
         }
-        public void CustomerInterface()
+        public void CustomerLoginInterface()
         {
             Console.WriteLine(Constant.customerInterfaceHeader);
             string userName = UserInput.GetUserName();
@@ -36,13 +33,15 @@ namespace BankAppDbFirstApproach.CLI
                 }
                 else
                 {
-                    CustomerInterface();
+                    CustomerLoginInterface();
                 }
             }
             else
             {
                 try
                 {
+                    Console.Clear();
+                    Console.WriteLine(Constant.loginSuccess);
                     AccountHolderActions();
                 }
                 catch (Exception e)
@@ -74,8 +73,9 @@ namespace BankAppDbFirstApproach.CLI
                     Console.WriteLine($"\nCurrent Balance - {SessionContext.Account.balance} {SessionContext.Bank.defaultCurrencyName}\n");
                     break;
                 case AccountHolderMenu.LogOut:
-                    SessionContext.Employee = null;
+                    SessionContext.Account = null;
                     SessionContext.Bank = null;
+                    Console.Clear();
                     program.WelcomeMenu();
                     return;
             }
@@ -95,14 +95,10 @@ namespace BankAppDbFirstApproach.CLI
                     UserOutput.ShowMessage(Constant.creditSuccess);
                 }
                 else
-                {
                     UserOutput.ShowMessage(Constant.unsupportedCurrency);
-                }
             }
             else
-            {
                 UserOutput.ShowMessage(Constant.invalidAmount);
-            }
         }
         private void WithdrawInterface()
         {
@@ -116,21 +112,16 @@ namespace BankAppDbFirstApproach.CLI
                     UserOutput.ShowMessage(Constant.debitSuccess);
                 }
                 else
-                {
                     UserOutput.ShowMessage(Constant.insufficientFunds);
-                }
             }
             else
-            {
                 UserOutput.ShowMessage(Constant.invalidAmount);
-            }
         }
         private void TransferInterface()
         {
             Console.WriteLine(Constant.transferHeader);
             string receiverAccNumber = UserInput.GetInputValue(Constant.receiverAccountNumber);
             Account recipientAccount = accountService.GetAccountByAccNumber(receiverAccNumber);
-
             if (recipientAccount != null)
             {
                 decimal amount = UserInput.GetDecimalInput(Constant.amountToTransfer);
@@ -148,14 +139,10 @@ namespace BankAppDbFirstApproach.CLI
                     }
                 }
                 else
-                {
                     UserOutput.ShowMessage(Constant.invalidAmount);
-                }
             }
             else
-            {
                 UserOutput.ShowMessage(Constant.recipientAccountNotFound);
-            }
         }
     }
 }

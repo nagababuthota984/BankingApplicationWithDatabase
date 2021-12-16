@@ -13,21 +13,19 @@ namespace BankAppDbFirstApproach.CLI
             int count = 1;
             if (Transactions.Count>=1)
             {
-                string heading = "Sno  | Transaction Id\t\t\t\t|  Type  | Amount | Balance | Transaction On";
-                Console.WriteLine(heading);
-                Console.WriteLine("-----------------------------------------------------------------------------------------------");
-                foreach (Transaction trans in Transactions)
+                Console.WriteLine(Constant.displayTransactionHeader);
+                Console.WriteLine(Constant.lineBreak);
+                foreach (Transaction trans in Transactions.OrderBy(tr=>tr.transactionOn))
                 {
-                    string output = $"{count,5}|{trans.transId,19}   |{(TransactionType)trans.transactionType,7}|{trans.transactionAmount,7}|{trans.balance,10}|{trans.transactionOn}";
+                    string output = $"{count,5}|{trans.transId,50}   |{(TransactionType)trans.transactionType,14}|{trans.transactionAmount,7}|{trans.balance,10}|{trans.transactionOn}";
                     Console.WriteLine(output);
                     count++;
                     Console.WriteLine();
                 } 
             }
             else
-            {
-                Console.WriteLine("\nNo transactions to show!\n");
-            }
+                Console.WriteLine(Constant.noTransactions);
+            
         }
 
         internal static void ShowMessage(string output)

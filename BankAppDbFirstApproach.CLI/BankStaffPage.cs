@@ -7,16 +7,14 @@ namespace BankAppDbFirstApproach.CLI
     public class BankEmployeePage
     {
         private readonly IBankService bankService;
-        private readonly IAccountService accountService;
         private readonly ITransactionService transactionService;
         private readonly Program program;
         private readonly BankStorageEntities dbContext;
         public BankEmployeePage()
         {
             bankService = Factory.GetService<IBankService>();
-            accountService = Factory.GetService<IAccountService>();
             transactionService = Factory.GetService<ITransactionService>();
-            program = new Program();
+            program = Factory.GetService<Program>();
             dbContext = Factory.GetService<BankStorageEntities>();
         }
         public void EmployeeInterface()
@@ -37,8 +35,9 @@ namespace BankAppDbFirstApproach.CLI
             {
                 try
                 {
+                    Console.Clear();
+                    Console.WriteLine(Constant.loginSuccess);
                     EmployeeActions();
-
                 }
                 catch (Exception ex)
                 {

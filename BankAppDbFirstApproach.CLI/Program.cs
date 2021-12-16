@@ -7,22 +7,21 @@ using System.Linq;
 namespace BankAppDbFirstApproach.CLI
 {
 
-    class Program
+    public class Program
     {
         private AccountHolderPage accountHolderPage;
         private BankEmployeePage employeePage;
         public static IServiceProvider container;
         public static void Main()
         {
-            container = DependencyInjector.Build();
             Program p = new Program();
             p.InitializeUI();
         }
 
         private void InitializeUI()
         {
-            accountHolderPage = new AccountHolderPage();
-            employeePage = new BankEmployeePage();
+            accountHolderPage = Factory.GetService<AccountHolderPage>();
+            employeePage = Factory.GetService<BankEmployeePage>();
             WelcomeMenu();
         }
         public void WelcomeMenu()
@@ -33,7 +32,7 @@ namespace BankAppDbFirstApproach.CLI
                 switch (GetMainMenuByInput(UserInput.GetIntegerInput("choice")))
                 {
                     case MainMenu.AccountHolder:
-                        accountHolderPage.CustomerInterface();
+                        accountHolderPage.CustomerLoginInterface();
                         WelcomeMenu();
                         break;
                     case MainMenu.BankEmployee:

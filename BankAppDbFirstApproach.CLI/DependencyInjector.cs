@@ -14,8 +14,11 @@ namespace BankAppDbFirstApproach.CLI
     {
         public static IServiceProvider Build()
         {
-
             var container = new ServiceCollection();
+            container.AddTransient<Program>();
+            container.AddTransient<AccountHolderPage>();
+            container.AddTransient<BankEmployeePage>(); 
+            container.AddTransient<EmployeeActionsHandler>();
             container.AddTransient<BankStorageEntities>();
             container.AddTransient<ITransactionService, TransactionService>();
             container.AddTransient<IAccountService, AccountService>();
