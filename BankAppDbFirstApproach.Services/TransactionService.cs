@@ -1,44 +1,46 @@
-﻿using BankAppDbFirstApproach.Models;
-using System;
-using System.Linq;
+﻿using AutoMapper;
+using BankAppDbFirstApproach.Data;
+using BankAppDbFirstApproach.Models;
 
 namespace BankAppDbFirstApproach.Services
 {
     public class TransactionService : ITransactionService
     {
-        private BankStorageEntities dbContext;
-        public TransactionService(BankStorageEntities context)
+        private BankStorageContext dbContext;
+        private IMapper _mapper;
+        public TransactionService(BankStorageContext context,IMapper mapper)
         {
-            dbContext = context;    
+            dbContext = context;
+            _mapper = mapper;
         }
-        public void CreateTransaction(Account userAccount, TransactionType transtype, decimal transactionamount, string currencyName)
+        public void CreateTransaction(AccountViewModel userAccount, TransactionType transtype, decimal transactionamount, string currencyName)
         {
-            Transaction newTransaction = new Transaction(userAccount, transtype, transactionamount, currencyName,false);
-            dbContext.Transactions.Add(newTransaction);
+            TransactionViewModel newTransaction = new TransactionViewModel(userAccount, transtype, transactionamount, currencyName, false);
+            dbContext.Transaction.Add(_mapper.Map<Transaction>(newTransaction));
             dbContext.SaveChanges();
         }
-        public void CreateTransferTransaction(Account userAccount, Account receiverAccount, decimal transactionAmount, ModeOfTransfer mode, string currencyName)
+        public void CreateTransferTransaction(AccountViewModel userAccount, AccountViewModel receiverAccount, decimal transactionAmount, ModeOfTransferOptions mode, string currencyName)
         {
-            Transaction senderTransaction = new Transaction(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currencyName, mode);
-            dbContext.Transactions.Add(senderTransaction);
-
-            Transaction receiverTransaction = new Transaction(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currencyName, mode);
-            receiverTransaction.accountId = receiverAccount.accountId;
-            receiverTransaction.balance = receiverAccount.balance;
-            dbContext.Transactions.Add(receiverTransaction);
+            TransactionViewModel senderTransaction = new TransactionViewModel(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currencyName, mode);
+            dbContext.Transaction.Add(_mapper.Map<Transaction>(senderTransaction));
+            TransactionViewModel receiverTransaction = new TransactionViewModel(userAccount, receiverAccount, TransactionType.Transfer, transactionAmount, currencyName, mode);
+            receiverTransaction.AccountId = receiverAccount.AccountId;
+            receiverTransaction.Balance = receiverAccount.Balance;
+            dbContext.Transaction.Add(_mapper.Map<Transaction>(receiverTransaction));
             dbContext.SaveChanges();
         }
-        public void CreateAndAddBankTransaction(Bank bank, Account userAccount, decimal charges, string currencyName)
+        public void CreateAndAddBankTransaction(BankViewModel bank, AccountViewModel userAccount, decimal charges, string currencyName)
         {
-            Transaction userTransaction = new Transaction(userAccount, TransactionType.Debit, charges, currencyName,true);
-            Transaction newBankTransaction = new Transaction(userAccount, bank, TransactionType.ServiceCharge, charges, currencyName);
-            dbContext.Transactions.Add(newBankTransaction);
-            dbContext.Transactions.Add(userTransaction);
+            TransactionViewModel userTransaction = new TransactionViewModel(userAccount, TransactionType.Debit, charges, currencyName, true);
+            TransactionViewModel newBankTransaction = new TransactionViewModel(userAccount, bank, TransactionType.ServiceCharge, charges, currencyName);
+            _mapper.Map<Transaction>(userTransaction);
+            dbContext.Transaction.Add(_mapper.Map<Transaction>(newBankTransaction));
+            dbContext.Transaction.Add(_mapper.Map<Transaction>(userTransaction));
             dbContext.SaveChanges();
         }
-        public Transaction GetTransactionById(string transactionId)
+        public TransactionViewModel GetTransactionById(string transactionId)
         {
-            return dbContext.Transactions.FirstOrDefault(tr=>tr.transId.Equals(transactionId));
+            return _mapper.Map<TransactionViewModel>(dbContext.Transaction.FirstOrDefault(tr => tr.TransId.Equals(transactionId)));
         }
     }
 }

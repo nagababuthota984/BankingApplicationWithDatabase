@@ -1,12 +1,7 @@
-﻿using BankAppDbFirstApproach.Models;
+﻿using BankAppDbFirstApproach.API;
+using BankAppDbFirstApproach.Data;
 using BankAppDbFirstApproach.Services;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankAppDbFirstApproach.CLI
 {
@@ -17,13 +12,15 @@ namespace BankAppDbFirstApproach.CLI
             var container = new ServiceCollection();
             container.AddTransient<Program>();
             container.AddTransient<AccountHolderPage>();
-            container.AddTransient<BankEmployeePage>(); 
-            container.AddTransient<EmployeeActionsHandler>();
-            container.AddTransient<BankStorageEntities>();
+            container.AddTransient<BankEmployeePage>();
+            container.AddTransient<BankStorageContext>();
             container.AddTransient<ITransactionService, TransactionService>();
             container.AddTransient<IAccountService, AccountService>();
             container.AddTransient<IBankService, BankService>();
+            
+            
+            container.AddSingleton(Startup.mapper);
             return container.BuildServiceProvider();
-        }   
+        }
     }
 }

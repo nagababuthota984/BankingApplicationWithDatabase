@@ -1,9 +1,5 @@
-﻿using BankAppDbFirstApproach.Services;
-using System;
-using BankAppDbFirstApproach.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Data.Entity;
+﻿using BankAppDbFirstApproach.Models;
+using BankAppDbFirstApproach.Services;
 
 namespace BankAppDbFirstApproach.CLI
 {
@@ -12,7 +8,7 @@ namespace BankAppDbFirstApproach.CLI
         private readonly IAccountService accountService;
         private readonly Program program;
         private readonly BankStorageEntities dbContext;
-        public AccountHolderPage(IAccountService accService,BankStorageEntities context,Program programInstance)
+        public AccountHolderPage(IAccountService accService, BankStorageEntities context, Program programInstance)
         {
             accountService = accService;
             program = programInstance;
@@ -66,7 +62,7 @@ namespace BankAppDbFirstApproach.CLI
                     break;
                 case AccountHolderMenu.PrintStatement:
                     Console.WriteLine(Constant.transactionHistoryHeader);
-                    List<Transaction> transactions = dbContext.Transactions.ToList().FindAll(t=>t.accountId.Equals(SessionContext.Account.accountId));
+                    List<Transaction> transactions = dbContext.Transactions.ToList().FindAll(t => t.accountId.Equals(SessionContext.Account.accountId));
                     UserOutput.ShowTransactions(transactions);
                     break;
                 case AccountHolderMenu.CheckBalance:

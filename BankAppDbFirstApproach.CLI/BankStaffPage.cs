@@ -1,6 +1,5 @@
 ﻿using BankAppDbFirstApproach.Models;
 using BankAppDbFirstApproach.Services;
-using System.Data.Entity;
 
 namespace BankAppDbFirstApproach.CLI
 {
@@ -109,15 +108,15 @@ namespace BankAppDbFirstApproach.CLI
             Console.WriteLine(Constant.accountCreationHeader);
             Customer newCustomer = GetDetailsOfNewCustomer();
             AccountType accountType = (AccountType)UserInput.GetIntegerInput(Constant.accountTypeOptions);
-            Account newAccount = new Account(newCustomer, accountType,SessionContext.Bank, dbContext.Accounts.ToList());
-            bankService.CreateAndAddAccount(newAccount,newCustomer , SessionContext.Bank);
+            Account newAccount = new Account(newCustomer, accountType, SessionContext.Bank, dbContext.Accounts.ToList());
+            bankService.CreateAndAddAccount(newAccount, newCustomer, SessionContext.Bank);
             UserOutput.ShowMessage($"Account has been created!\nCredentials:Username - {newAccount.username}\nPassword - {newAccount.password}\nAccount Number - {newAccount.accountNumber}\n");
         }
         private Customer GetDetailsOfNewCustomer()
         {
             string name = GetName();
             int age = GetAge();
-            Gender gender = GetGenderByInput(UserInput.GetIntegerInput(Constant.genderOptions));
+            GenderOptionsOptions gender = GetGenderOptionsByInput(UserInput.GetIntegerInput(Constant.genderOptions));
             DateTime dob = GetDateTimeInput(UserInput.GetInputValue(Constant.dateOfBirth));
             string contactNumber = UserInput.GetInputValue(Constant.contactNumber);
             long aadharNumber = UserInput.GetLongInput(Constant.aadharNumber);
@@ -152,7 +151,7 @@ namespace BankAppDbFirstApproach.CLI
             if (userAccount != null)
             {
                 Customer customer = dbContext.Customers.FirstOrDefault(cust => cust.customerId.Equals(userAccount.customerId));
-                if (customer!=null)
+                if (customer != null)
                 {
                     UpdateAccountHandler(customer);
                     Console.WriteLine(Constant.updateConfirmation);
@@ -162,7 +161,7 @@ namespace BankAppDbFirstApproach.CLI
                         Console.WriteLine(Constant.updateSuccess);
                     }
                     else
-                        Console.WriteLine(Constant.updateFail); 
+                        Console.WriteLine(Constant.updateFail);
                 }
             }
             else
@@ -335,7 +334,7 @@ namespace BankAppDbFirstApproach.CLI
             else if (v == 2)
                 return CustomerProperties.Age;
             else if (v == 3)
-                return CustomerProperties.Gender;
+                return CustomerProperties.GenderOptions;
             else if (v == 4)
                 return CustomerProperties.Dob;
             else if (v == 5)
@@ -376,19 +375,19 @@ namespace BankAppDbFirstApproach.CLI
             else
                 return BankEmployeeMenu.Logout;
         }
-        private Gender GetGenderByInput(int v)
+        private GenderOptionsOptions GetGenderOptionsByInput(int v)
         {
             if (v == 1)
             {
-                return Gender.Male;
+                return GenderOptionsOptions.Male;
             }
             else if (v == 2)
             {
-                return Gender.Female;
+                return GenderOptionsOptions.Female;
             }
             else
             {
-                return Gender.PreferNotToSay;
+                return GenderOptionsOptions.PreferNotToSay;
             }
         }
         private string GetName()

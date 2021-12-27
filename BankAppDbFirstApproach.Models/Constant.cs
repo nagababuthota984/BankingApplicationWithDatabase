@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace BankAppDbFirstApproach.Models
+﻿namespace BankAppDbFirstApproach.Models
 {
     public class Constant
     {
@@ -12,7 +10,7 @@ namespace BankAppDbFirstApproach.Models
         public static string customerPropertiesMenu = "Please enter an option:\n1.Name\n2.Age\n3.Gender\n4.Dob\n5.Aadhar\n6.PAN\n7.Contact Number\n8.Address\nAny other key to exit.";
         public static string accountHolderOptions = "\nChoose any one option:\n1.Deposit\n2.Withdraw\n3.Transfer Amount\n4.Print Transaction history\n5.Check Balance\n6.Logout";
         public static string invalidCredentialsError = "Invalid Credentials. Please try again or enter 0 for Main menu\n";
-        public static string genderOptions = "Gender:\n1.Male\n2.Female\n3.Prefer Not to say";
+        public static string genderOptions = "GenderOptions:\n1.Male\n2.Female\n3.Prefer Not to say";
         public static string accountTypeOptions = "Account Type(1.Savings/2.Current)";
         public static string bankAlreadyExists = "A Bank with same name already exists!";
         public static string updateConfirmation = "Are you sure you want the changes to save?(Y/N)";
@@ -79,8 +77,8 @@ namespace BankAppDbFirstApproach.Models
         public static string customerMenuHeader = "\n================CUSTOMER MENU===================";
         public static string invalidUserName = "Invalid Username!\n";
         public static string invalidPassword = "Invalid Password!\n";
-        public static string displayTransactionHeader="Sno  | Transaction Id\t\t\t\t\t   |  Type  \t  | Amount | Balance | Transaction On";
-        public static string lineBreak= "-----------------------------------------------------------------------------------------------------------------";
-        public static string loginSuccess= "\n*********************Logged In**********************\n";
+        public static string displayTransactionHeader = "Sno  | Transaction Id\t\t\t\t\t   |  Type  \t  | Amount | Balance | Transaction On";
+        public static string lineBreak = "-----------------------------------------------------------------------------------------------------------------";
+        public static string loginSuccess = "\n*********************Logged In**********************\n";
     }
 }

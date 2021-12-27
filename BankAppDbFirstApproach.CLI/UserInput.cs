@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using BankAppDbFirstApproach.Models;
+﻿using BankAppDbFirstApproach.Models;
 namespace BankAppDbFirstApproach.CLI
 {
     public class UserInput
@@ -16,7 +13,7 @@ namespace BankAppDbFirstApproach.CLI
             Console.WriteLine(Constant.customerMenuHeader);
             Console.WriteLine(Constant.accountHolderOptions);
             Console.WriteLine("==================================================\n");
-            if(Int32.TryParse(Console.ReadLine(),out int result))
+            if (Int32.TryParse(Console.ReadLine(), out int result))
                 return GetAccountHolderMenuByInteger(result);
             else
             {

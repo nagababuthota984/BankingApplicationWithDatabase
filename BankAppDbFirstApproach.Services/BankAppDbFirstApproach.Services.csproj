@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
@@ -12,10 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="automapper.extensions.microsoft.dependencyinjection" Version="8.1.1" />
     <PackageReference Include="entityframework" Version="6.4.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BankAppDbFirstApproach.Data\BankAppDbFirstApproach.Data.csproj" />
     <ProjectReference Include="..\BankAppDbFirstApproach.Models\BankAppDbFirstApproach.Models.csproj" />
   </ItemGroup>
 

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
+﻿using AutoMapper;
+using BankAppDbFirstApproach.Data;
 using BankAppDbFirstApproach.Models;
 
 namespace BankAppDbFirstApproach.Services
@@ -10,143 +7,167 @@ namespace BankAppDbFirstApproach.Services
     public class BankService : IBankService
     {
         private IAccountService accountService;
-        private BankStorageEntities dbContext;
-        public BankService(IAccountService accService, BankStorageEntities context)
+        private BankStorageContext dbContext;
+        private IMapper mapper;
+        public BankService(IAccountService accService, BankStorageContext context, IMapper mapperObject)
         {
             accountService = accService;
             dbContext = context;
+            mapper = mapperObject;
         }
-        public Bank CreateAndGetBank(string name, string branch, string ifsc)
+        public BankViewModel CreateAndGetBank(string name, string branch, string ifsc)
         {
-            Bank newBank = new Bank(name, branch, ifsc);
-            Currency currency = new Currency( "INR", 1, newBank.bankId);
-            Customer customer = new Customer("Admin", newBank.bankId);
-            Employee employee = new Employee("Admin", "admin", newBank.bankId,customer.customerId);
-            dbContext.Banks.Add(newBank);
-            dbContext.Customers.Add(customer);
-            dbContext.Currencies.Add(currency);
-            dbContext.Employees.Add(employee);
+            BankViewModel newBank = new BankViewModel(name, branch, ifsc);
+            CurrencyViewModel currency = new CurrencyViewModel("INR", 1, newBank.BankId);
+            CustomerViewModel customer = new CustomerViewModel("Admin", newBank.BankId);
+            EmployeeViewModel employee = new EmployeeViewModel(newBank.BankId,"Admin", "admin", customer.CustomerId);
+            dbContext.Bank.Add(mapper.Map<Bank>(newBank));
+            dbContext.Customer.Add(mapper.Map<Customer>(customer));
+            dbContext.Currency.Add(mapper.Map<Currency>(currency));
+            dbContext.Employee.Add(mapper.Map<Employee>(employee));
             dbContext.SaveChanges();
             return newBank;
         }
-        public Employee CreateAndGetEmployee(Customer newCustomer,EmployeeDesignation role, Bank bank)
+        public EmployeeViewModel CreateAndGetEmployee(CustomerViewModel newCustomer, EmployeeDesignation role, BankViewModel bank)
         {
-            Employee employee = new Employee(newCustomer,role, bank);
-            dbContext.Customers.Add(newCustomer);
-            dbContext.Employees.Add(employee);
+            EmployeeViewModel employee = new EmployeeViewModel(newCustomer, role, bank);
+            dbContext.Customer.Add(mapper.Map<Customer>(newCustomer));
+            dbContext.Employee.Add(mapper.Map<Employee>(employee));
             dbContext.SaveChanges();
             return employee;
         }
         public bool IsValidEmployee(string userName, string password)
         {
-            Employee emp = dbContext.Employees.ToList().FirstOrDefault(e => e.username.EqualInvariant(userName) && e.password.EqualInvariant(password)); ;
+            Employee emp = dbContext.Employee.ToList().FirstOrDefault(e => e.Username.EqualInvariant(userName) && e.Password.EqualInvariant(password)); ;
             if (emp == null)
                 return false;
             else
             {
-                PrepareEmployeeSessionContext(emp);
+                PrepareEmployeeSessionContext(mapper.Map<EmployeeViewModel>(emp));
                 return true;
             }
         }
-        private void PrepareEmployeeSessionContext(Employee emp)
+        private void PrepareEmployeeSessionContext(EmployeeViewModel emp)
         {
             SessionContext.Employee = emp;
-            SessionContext.Bank = GetBankById(emp.bankId);
+            SessionContext.Bank = GetBankById(emp.BankId);
         }
-        public void CreateAndAddAccount(Account newAccount,Customer newCustomer, Bank bank)
+        public void CreateAndAddAccount(AccountViewModel newAccount, CustomerViewModel newCustomer, BankViewModel bank)
         {
-            newAccount.bankId = bank.bankId;
-            newAccount.customerId = newCustomer.customerId;
-            dbContext.Accounts.Add(newAccount);
-            dbContext.Customers.Add(newCustomer);
+            newAccount.BankId = bank.BankId;
+            newAccount.AccountNumber = GenerateAccountNumber();
+            newAccount.CustomerId = newCustomer.CustomerId;
+            dbContext.Account.Add(mapper.Map<Account>(newAccount));
+            dbContext.Customer.Add(mapper.Map<Customer>(newCustomer));
             dbContext.SaveChanges();
         }
-        public Bank GetBankById(string bankId)
+        public BankViewModel GetBankById(string bankId)
         {
-            return dbContext.Banks.ToList().FirstOrDefault(b => b.bankId.EqualInvariant(bankId));
+            Bank bank = dbContext.Bank.ToList().FirstOrDefault(b => b.BankId.EqualInvariant(bankId));
+            return mapper.Map<BankViewModel>(bank);
         }
-        public List<Transaction> GetTransactionsByDate(DateTime date, Bank bank)
+        public List<TransactionViewModel> GetTransactionsByDate(DateTime date, string bankId)
         {
             List<Transaction> transactions = new List<Transaction>();
-            transactions.AddRange(bank.Transactions.Where(tr => tr.transactionOn.Date == date && tr.bankId.Equals(bank.bankId)));
-            return transactions;
+            transactions.AddRange(dbContext.Transaction.Where(tr => tr.TransactionOn.Date == date && tr.BankId.EqualInvariant(bankId)));
+            return mapper.Map<List<TransactionViewModel>>(transactions);
         }
-        public List<Transaction> GetAccountTransactions(string accountId)
+        public List<TransactionViewModel> GetAccountTransactions(string accountId)
         {
-            return dbContext.Transactions.Where(tr=>tr.accountId.Equals(accountId)).ToList();
+            return mapper.Map<List<TransactionViewModel>>(dbContext.Transaction.Where(tr => tr.AccountId.Equals(accountId)).ToList());
         }
-        public List<Transaction> GetTransactions(Bank bank)
+        public List<TransactionViewModel> GetTransactions(string bankId)
         {
             List<Transaction> transactions = new List<Transaction>();
-            transactions.AddRange(bank.Transactions);
-            return transactions;
+            transactions.AddRange(dbContext.Transaction.Where(tr=> (tr.IsBankTransaction??false) && tr.BankId.EqualInvariant(bankId)));
+            return mapper.Map<List<TransactionViewModel>>(transactions);
         }
-        public bool AddNewCurrency(Bank bank, string newCurrencyName, decimal exchangeRate)
+        public bool AddNewCurrency(BankViewModel bank, string newCurrencyName, decimal exchangeRate)
         {
-            if (dbContext.Currencies.Any(c => c.bankId.Equals(bank.bankId)&& c.name.Equals(newCurrencyName)))
+            if (dbContext.Currency.Any(c => c.BankId.Equals(bank.BankId) && c.Name.Equals(newCurrencyName)))
             {
                 return false;
             }
-            dbContext.Currencies.Add(new Currency(newCurrencyName, exchangeRate, bank.bankId));
+            dbContext.Currency.Add(mapper.Map<Currency>(new CurrencyViewModel(newCurrencyName, exchangeRate, bank.BankId)));
             dbContext.SaveChanges();
             return true;
         }
         public bool DeleteAccount(Account userAccount)
         {
-            userAccount.status = (int)AccountStatus.Closed;
+            userAccount.Status = (int)AccountStatus.Closed;
             dbContext.SaveChanges();
             return true;
         }
-        public bool ModifyServiceCharge(ModeOfTransfer mode, bool isSelfBankCharge, Bank bank, decimal newValue)
+        public bool ModifyServiceCharge(ModeOfTransferOptions mode, bool isSelfBankCharge, BankViewModel bank, decimal newValue)
         {
             bool isModified;
             if (isSelfBankCharge)
             {
-                if (mode == ModeOfTransfer.RTGS)
+                if (mode == ModeOfTransferOptions.RTGS)
                 {
-                    bank.selfRTGS = newValue;
+                    bank.SelfRtgs = newValue;
                 }
                 else
                 {
-                    bank.selfIMPS = newValue;
+                    bank.SelfImps = newValue;
                 }
                 isModified = true;
             }
             else
             {
-                if (mode == ModeOfTransfer.RTGS)
+                if (mode == ModeOfTransferOptions.RTGS)
                 {
-                    bank.otherRTGS = newValue; 
+                    bank.OtherRtgs = newValue;
                 }
                 else
                 {
-                    bank.otherIMPS = newValue;
+                    bank.OtherImps = newValue;
                 }
                 isModified = true;
             }
             dbContext.SaveChanges();
             return isModified;
         }
-       
-        public bool RevertTransaction(Transaction transaction, Bank bank)
+
+        public bool RevertTransaction(TransactionViewModel transaction, BankViewModel bank)
         {
-            Account userAccount = accountService.GetAccountById(transaction.accountId);
-            if (transaction.transactionType == (int)TransactionType.Credit)
+            AccountViewModel userAccount = accountService.GetAccountById(transaction.AccountId);
+            if (transaction.TransactionType == (int)TransactionType.Credit)
             {
-                accountService.WithdrawAmount(userAccount, transaction.transactionAmount);
+                accountService.WithdrawAmount(userAccount, transaction.TransactionAmount);
             }
-            else if (transaction.transactionType == (int)TransactionType.Debit)
+            else if (transaction.TransactionType == (int)TransactionType.Debit)
             {
-                accountService.DepositAmount(userAccount, transaction.transactionAmount, dbContext.Currencies.FirstOrDefault(c => c.name.Equals(bank.defaultCurrencyName)));
+                accountService.DepositAmount(userAccount, transaction.TransactionAmount, mapper.Map<CurrencyViewModel>(dbContext.Currency.FirstOrDefault(c => c.Name.Equals(bank.DefaultCurrencyName))));
             }
-            else if (transaction.transactionType == (int)TransactionType.Transfer)
+            else if (transaction.TransactionType == (int)TransactionType.Transfer)
             {
-                Account receiverAccount = accountService.GetAccountById(transaction.accountId);
-                accountService.WithdrawAmount(receiverAccount, transaction.transactionAmount);
-                accountService.DepositAmount(userAccount, transaction.transactionAmount, dbContext.Currencies.FirstOrDefault(c => c.name.Equals(bank.defaultCurrencyName)));
+                AccountViewModel receiverAccount = accountService.GetAccountById(transaction.AccountId);
+                accountService.WithdrawAmount(receiverAccount, transaction.TransactionAmount);
+                accountService.DepositAmount(userAccount, transaction.TransactionAmount, mapper.Map<CurrencyViewModel>(dbContext.Currency.FirstOrDefault(c => c.Name.Equals(bank.DefaultCurrencyName))));
             }
             dbContext.SaveChanges();
             return true;
+        }
+        private string GenerateAccountNumber()
+        {
+            List<AccountViewModel> accounts = accountService.GetAllAccounts();
+            string accNumber;
+            do
+            {
+                accNumber = GenerateRandomNumber(12);
+            } while (accounts.Any(account => account.AccountNumber.Equals(accNumber)));
+            return accNumber;
+        }
+        private static string GenerateRandomNumber(int length)
+        {
+            Random r = new Random();
+            string accountNumber = "";
+            for (int i = 1; i < length; i++)
+            {
+                accountNumber += r.Next(0, 9).ToString();
+            }
+            return accountNumber;
         }
     }
 }

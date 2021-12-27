@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
@@ -11,9 +11,11 @@
   <ItemGroup>
     <PackageReference Include="entityframework" Version="6.4.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BankAppDbFirstApproach.API\BankAppDbFirstApproach.API.csproj" />
     <ProjectReference Include="..\BankAppDbFirstApproach.Models\BankAppDbFirstApproach.Models.csproj" />
     <ProjectReference Include="..\BankAppDbFirstApproach.Services\BankAppDbFirstApproach.Services.csproj" />
   </ItemGroup>

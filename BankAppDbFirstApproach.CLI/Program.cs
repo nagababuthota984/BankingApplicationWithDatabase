@@ -1,7 +1,4 @@
-﻿using BankAppDbFirstApproach.Services;
-using System;
-using BankAppDbFirstApproach.Models;
-using System.Linq;
+﻿using BankAppDbFirstApproach.Models;
 
 
 namespace BankAppDbFirstApproach.CLI

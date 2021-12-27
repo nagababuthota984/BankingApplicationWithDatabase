@@ -42,7 +42,7 @@
         Transfer,
         ServiceCharge
     }
-    public enum ModeOfTransfer
+    public enum ModeOfTransferOptions
     {
         RTGS = 1,
         IMPS,
@@ -61,7 +61,7 @@
         Inactive,
         Closed
     }
-    public enum Gender
+    public enum GenderOptions
     {
         Male = 1,
         Female,
@@ -71,7 +71,7 @@
     {
         Name = 1,
         Age,
-        Gender,
+        GenderOptions,
         Dob,
         AadharNumber,
         PanNumber,

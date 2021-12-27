@@ -1,10 +1,4 @@
-﻿using BankAppDbFirstApproach.Models;
-using BankAppDbFirstApproach.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BankAppDbFirstApproach.CLI
+﻿namespace BankAppDbFirstApproach.CLI
 {
     public static class Factory
     {

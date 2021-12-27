@@ -1,87 +1,94 @@
 ﻿using BankAppDbFirstApproach.Models;
-
+using BankAppDbFirstApproach.Data;
+using AutoMapper;
 
 namespace BankAppDbFirstApproach.Services
 {
     public class AccountService : IAccountService
     {
         private ITransactionService transService;
-        private BankStorageEntities dbContext;
-        public AccountService(ITransactionService transactionService,BankStorageEntities context)
+        private BankStorageContext dbContext;
+        private IMapper mapper;
+        public AccountService(ITransactionService transactionService, BankStorageContext context,IMapper mapperObject)
         {
             transService = transactionService;
             dbContext = context;
+            mapper = mapperObject;
         }
         public bool IsValidCustomer(string userName, string password)
         {
-            Account acc = dbContext.Accounts.ToList().FirstOrDefault(acc => acc.username.EqualInvariant(userName) && acc.password.EqualInvariant(password) && acc.status == (int)AccountStatus.Active);
+            var acc = dbContext.Account.ToList().FirstOrDefault(acc => acc.Username.EqualInvariant(userName) && acc.Password.EqualInvariant(password) && acc.Status == (int)AccountStatus.Active);
             if (acc == null)
                 return false;
             else
             {
-                PrepareCustomerSessionContext(acc);
+                PrepareCustomerSessionContext(mapper.Map<AccountViewModel>(acc));
                 return true;
             }
         }
-        private void PrepareCustomerSessionContext(Account acc)
+        private void PrepareCustomerSessionContext(AccountViewModel acc)
         {
             SessionContext.Account = acc;
-            SessionContext.Bank = dbContext.Banks.ToList().FirstOrDefault(b=>b.bankId.EqualInvariant(acc.bankId)); 
+            SessionContext.Bank = mapper.Map<BankViewModel>(dbContext.Bank.ToList().FirstOrDefault(b => b.BankId.EqualInvariant(acc.BankId)));
         }
-        public Account GetAccountByAccNumber(string accNumber)
+        public AccountViewModel GetAccountByAccNumber(string accNumber)
         {
-            return dbContext.Accounts.ToList().FirstOrDefault(ac=>ac.accountNumber.EqualInvariant(accNumber));
+            return mapper.Map<AccountViewModel>(dbContext.Account.ToList().FirstOrDefault(ac => ac.AccountNumber.EqualInvariant(accNumber)));
         }
-        public Account GetAccountById(string accountId)
+        public AccountViewModel GetAccountById(string accountId)
         {
-            return dbContext.Accounts.ToList().FirstOrDefault(ac=>ac.accountId.EqualInvariant(accountId));
+            return mapper.Map<AccountViewModel>(dbContext.Account.ToList().FirstOrDefault(ac => ac.AccountId.EqualInvariant(accountId)));
         }
-        public void DepositAmount(Account userAccount, decimal amount, Currency currency)
+        public void DepositAmount(AccountViewModel userAccount, decimal amount, CurrencyViewModel currency)
         {
-            amount *= currency.exchangeRate;
-            userAccount.balance += amount;
-            transService.CreateTransaction(userAccount, TransactionType.Credit, amount, currency.name);
+            amount *= currency.ExchangeRate;
+            userAccount.Balance += amount;
+            transService.CreateTransaction(userAccount, TransactionType.Credit, amount, currency.Name);
             dbContext.SaveChanges();
         }
-        public void WithdrawAmount(Account userAccount, decimal amount)
+        public void WithdrawAmount(AccountViewModel userAccount, decimal amount)
         {
-            userAccount.balance -= amount;
-            transService.CreateTransaction(userAccount, TransactionType.Debit, amount, SessionContext.Bank.defaultCurrencyName);
+            userAccount.Balance -= amount;
+            transService.CreateTransaction(userAccount, TransactionType.Debit, amount, SessionContext.Bank.DefaultCurrencyName);
             dbContext.SaveChanges();
         }
-        public void TransferAmount(Account senderAccount, Bank senderBank, Account receiverAccount, decimal amount, ModeOfTransfer mode)
+        public void TransferAmount(AccountViewModel senderAccount, BankViewModel senderBank, AccountViewModel receiverAccount, decimal amount, ModeOfTransferOptions mode)
         {
             try
             {
-                senderAccount.balance -= amount;
-                receiverAccount.balance += amount;
-                ApplyTransferCharges(senderAccount, senderBank, receiverAccount.bankId, amount, mode, SessionContext.Bank.defaultCurrencyName);
-                transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.defaultCurrencyName);
+                senderAccount.Balance -= amount;
+                receiverAccount.Balance += amount;
+                ApplyTransferCharges(senderAccount, senderBank, receiverAccount.BankId, amount, mode, SessionContext.Bank.DefaultCurrencyName);
+                transService.CreateTransferTransaction(senderAccount, receiverAccount, amount, mode, SessionContext.Bank.DefaultCurrencyName);
                 dbContext.SaveChanges();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.InnerException.Message+e.InnerException.StackTrace);
+                Console.WriteLine(e.InnerException.Message + e.InnerException.StackTrace);
             }
         }
-        public void ApplyTransferCharges(Account senderAccount, Bank senderBank, string receiverBankId, decimal amount, ModeOfTransfer mode, string currencyName)
+        public void ApplyTransferCharges(Models.AccountViewModel senderAccount, Models.BankViewModel senderBank, string receiverBankId, decimal amount, ModeOfTransferOptions mode, string currencyName)
         {
             decimal charges = 0;
-            if (mode == ModeOfTransfer.RTGS)
+            if (mode == ModeOfTransferOptions.RTGS)
             {
-                charges = senderAccount.bankId.Equals(receiverBankId)? (senderBank.selfRTGS * amount) / 100 : (senderBank.otherRTGS * amount) / 100;
+                charges = senderAccount.BankId.Equals(receiverBankId) ? (senderBank.SelfRtgs * amount) / 100 : (senderBank.OtherRtgs * amount) / 100;
             }
             else
             {
-                charges = senderAccount.bankId.Equals(receiverBankId) ? (senderBank.selfIMPS * amount) / 100 : (senderBank.otherIMPS * amount) / 100;
+                charges = senderAccount.BankId.Equals(receiverBankId) ? (senderBank.SelfImps * amount) / 100 : (senderBank.OtherImps * amount) / 100;
             }
-            senderAccount.balance -= charges;
-            senderBank.balance += charges;
+            senderAccount.Balance -= charges;
+            senderBank.Balance += charges;
             transService.CreateAndAddBankTransaction(senderBank, senderAccount, charges, currencyName);
             dbContext.SaveChanges();
         }
-    
 
+        public List<AccountViewModel> GetAllAccounts()
+        {
+            return mapper.Map<List<AccountViewModel>>(dbContext.Account);
+        }
+       
     }
 }
 

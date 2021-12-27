@@ -1,19 +1,17 @@
-﻿using BankAppDbFirstApproach.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using BankAppDbFirstApproach.Data;
+using BankAppDbFirstApproach.Models;
 
 namespace BankAppDbFirstApproach.Services
 {
     public interface IAccountService
     {
         bool IsValidCustomer(string userName, string password);
-        Account GetAccountByAccNumber(string accNumber);
-        Account GetAccountById(string accountId);
-        void DepositAmount(Account userAccount, decimal amount, Currency currency);
-        void WithdrawAmount(Account userAccount, decimal amount);
-        void TransferAmount(Account senderAccount, Bank senderBank, Account receiverAccount, decimal amount, ModeOfTransfer mode);
-        void ApplyTransferCharges(Account senderAccount, Bank senderBank, string receiverBankId, decimal amount, ModeOfTransfer mode, string currencyName);
-
+        AccountViewModel GetAccountByAccNumber(string accNumber);
+        AccountViewModel GetAccountById(string accountId);
+        void DepositAmount(AccountViewModel userAccount, decimal amount, CurrencyViewModel currency);
+        void WithdrawAmount(AccountViewModel userAccount, decimal amount);
+        void TransferAmount(AccountViewModel senderAccount, BankViewModel senderBank, AccountViewModel receiverAccount, decimal amount, ModeOfTransferOptions mode);
+        void ApplyTransferCharges(AccountViewModel senderAccount, BankViewModel senderBank, string receiverBankId, decimal amount, ModeOfTransferOptions mode, string currencyName);
+        List<AccountViewModel> GetAllAccounts();
     }
 }

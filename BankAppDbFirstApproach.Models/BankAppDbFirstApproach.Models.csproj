@@ -1,25 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="BankAppDbContext.edmx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EntityDeploy Include="BankAppDbContext.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>BankAppDbContext.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="EntityFramework" Version="5.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
   </ItemGroup>
 
@@ -27,35 +17,6 @@
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Security" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="BankAppDbContext.Context.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>BankAppDbContext.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Update="BankAppDbContext.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>BankAppDbContext.tt</DependentUpon>
-    </Compile>
-    <Compile Update="BankAppDbContext.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>BankAppDbContext.edmx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="BankAppDbContext.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>BankAppDbContext.Context.cs</LastGenOutput>
-    </None>
-    <None Update="BankAppDbContext.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>BankAppDbContext.cs</LastGenOutput>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
