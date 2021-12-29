@@ -11,11 +11,11 @@
         public decimal Balance { get; set; }
         public int ModeOfTransfer { get; set; }
         public string Currency { get; set; }
-        public int TransactionType { get; set; }
+        public TransactionType TransactionType { get; set; }
         public string BankId { get; set; }
         public string OtherPartyBankId { get; set; }
         public bool? IsBankTransaction { get; set; }
-
+            
         
         public TransactionViewModel()
         {

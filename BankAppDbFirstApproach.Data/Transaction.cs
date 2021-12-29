@@ -10,7 +10,7 @@ namespace BankAppDbFirstApproach.Data
         public string Receivername { get; set; }
         public DateTime TransactionOn { get; set; }
         public decimal TransactionAmount { get; set; }
-        public decimal Balance { get; set; }
+        //public decimal Balance { get; set; }
         public int ModeOfTransfer { get; set; }
         public string Currency { get; set; }
         public int TransactionType { get; set; }

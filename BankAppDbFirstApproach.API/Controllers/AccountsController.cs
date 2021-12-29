@@ -17,7 +17,7 @@ namespace BankAppDbFirstApproach.API.Controllers
         private readonly IBankService _bankService;
         private readonly IMapper _mapper;
 
-        public AccountsController(IAccountService accService, IBankService bankService,IMapper mapper)
+        public AccountsController(IAccountService accService, IBankService bankService, IMapper mapper)
         {
             _accountService = accService;
             _bankService = bankService;
@@ -25,32 +25,135 @@ namespace BankAppDbFirstApproach.API.Controllers
         }
 
         [HttpGet]
-        public List<AccountViewModel> GetAllAccounts()
+        public IActionResult GetAllAccounts()
         {
-            return _accountService.GetAllAccounts();
+            return Ok(_accountService.GetAllAccounts());
         }
         [HttpGet("getAccountById/{id}")]
-        public AccountViewModel GetAccountById(string id)
+        public IActionResult GetAccountById(string id)
         {
-            return _accountService.GetAccountById(id);
+
+            AccountViewModel account = _accountService.GetAccountById(id);
+            if (account != null)
+                return Ok(account);
+            else
+                return NotFound("Account with matching id not found");
+
+
         }
         [HttpGet("getAccountByAccNum/{accNumber}")]
-        public AccountViewModel GetAccountByAccNum(string accNumber)
+        public IActionResult GetAccountByAccNum(string accNumber)
         {
-            return _accountService.GetAccountByAccNumber(accNumber);
+            AccountViewModel account = _accountService.GetAccountByAccNumber(accNumber);
+            if (account != null)
+                return Ok(account);
+            else
+                return NotFound("Account with matching Account Number not found");
         }
         [HttpPost("createAccount/{bankId}")]
-        public void CreateAccount([FromBody] CustomerViewModel customer, [FromRoute]string bankId,[FromRoute]AccountType accType)
+        public IActionResult CreateAccount([FromBody] CustomerViewModel customer, [FromRoute] string bankId, [FromRoute] AccountType accType)
         {
             BankViewModel bank = _bankService.GetBankById(bankId);
-            AccountViewModel newAccount = new AccountViewModel(customer,accType,bank);
-            _bankService.CreateAndAddAccount(newAccount, customer,bank);
+            if (bank != null)
+            {
+                AccountViewModel newAccount = new AccountViewModel(customer, accType, bank);
+                return Ok(_bankService.CreateAndAddAccount(newAccount, customer, bank));
+            }
+            else
+                return NotFound("Bank with matching id not found.Please give valid bank id.");
+        }
+        [HttpPut("updateCustomer")]
+        public IActionResult UpdateAccount([FromBody] CustomerViewModel customer)
+        {
+            _accountService.UpdateAccount(customer);
+            return Ok();
         }
         [HttpDelete("deleteAcc/{id}")]
-        public void Delete(string id)
+        public IActionResult Delete(string id)
         {
             Account acc = _mapper.Map<Account>(_accountService.GetAccountById(id));
-            _bankService.DeleteAccount(acc);
+            if (acc != null)
+            {
+                _bankService.DeleteAccount(acc);
+                return Ok();
+            }
+            else
+                return NotFound("Account with matching id not found.Please provide a valid Account ID");
+
+        }
+        [HttpPut("deposit/{accountId}/{amount}/{currencyName}")]
+        public IActionResult Deposit([FromRoute]string accountId, decimal amount, [FromRoute] string currencyName)
+        {
+            AccountViewModel account = _accountService.GetAccountById(accountId);
+            if (account != null)
+            {
+                CurrencyViewModel curr = _bankService.GetCurrencyByName(currencyName);
+                if (curr != null)
+                {
+                    if (amount > 0)
+                    {
+                        _accountService.DepositAmount(account, amount, curr);
+                        return Ok();
+                    }
+                    else
+                        return BadRequest("Depositing amount should be greater than 0.");
+                }
+                else
+                    return NotFound("Currency with matching name not found.");
+            }
+            else
+                return NotFound("Account with matching Id not found.Please provide a valid account ID");
+        }
+        [HttpPut("withdraw")]
+        public IActionResult Withdraw(string accountId, decimal amount)
+        {
+            AccountViewModel account = _accountService.GetAccountById(accountId);
+            if (account != null)
+            {
+                if (amount > 0)
+                {
+                    if (amount <= account.Balance)
+                    {
+                        _accountService.WithdrawAmount(account, amount);
+                        return Ok();
+                    }
+                    else
+                        return BadRequest("Insufficient funds.");
+                }
+                else
+                    return BadRequest("Withdrawl amount should be greater than 0.");
+            }
+            else
+                return NotFound("Account with matching Id not found");
+        }
+        [HttpPut("transfer")]
+        public IActionResult Transfer(string senderAccId, string receiverAccNumber, decimal amount, ModeOfTransferOptions mode)
+        {
+            AccountViewModel senderAccount = _accountService.GetAccountById(senderAccId);
+            if (senderAccount != null)
+            {
+                AccountViewModel receiverAccount = _accountService.GetAccountByAccNumber(receiverAccNumber);
+                if (receiverAccount != null)
+                {
+                    if (amount > 0)
+                    {
+                        if (amount >= senderAccount.Balance)
+                        {
+                            BankViewModel senderBank = _bankService.GetBankById(senderAccount.BankId);
+                            _accountService.TransferAmount(senderAccount, senderBank, receiverAccount, amount, mode);
+                            return Ok();
+                        }
+                        else
+                            return BadRequest("Insufficient funds.");
+                    }
+                    else
+                        return BadRequest("Amount should be greater than 0.");
+                }
+                else
+                    return NotFound("Receiver Account with matching Account Number not found");
+            }
+            else
+                return NotFound("Account with matching Account Number not found");
         }
     }
 }

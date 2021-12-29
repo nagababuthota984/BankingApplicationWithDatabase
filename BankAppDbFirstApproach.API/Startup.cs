@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BankAppDbFirstApproach.Data;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankAppDbFirstApproach.API
 {

@@ -1,4 +1,5 @@
-﻿using BankAppDbFirstApproach.Models;
+﻿using BankAppDbFirstApproach.Data;
+using BankAppDbFirstApproach.Models;
 using BankAppDbFirstApproach.Services;
 
 namespace BankAppDbFirstApproach.CLI
@@ -7,14 +8,16 @@ namespace BankAppDbFirstApproach.CLI
     {
         private readonly IBankService bankService;
         private readonly ITransactionService transactionService;
+        private readonly IAccountService accountService;
         private readonly Program program;
-        private readonly BankStorageEntities dbContext;
+        private readonly BankStorageContext dbContext;
         public BankEmployeePage()
         {
             bankService = Factory.GetService<IBankService>();
             transactionService = Factory.GetService<ITransactionService>();
             program = Factory.GetService<Program>();
-            dbContext = Factory.GetService<BankStorageEntities>();
+            dbContext = Factory.GetService<BankStorageContext>();
+            accountService = Factory.GetService<AccountService>();
         }
         public void EmployeeInterface()
         {
@@ -116,7 +119,7 @@ namespace BankAppDbFirstApproach.CLI
         {
             string name = GetName();
             int age = GetAge();
-            GenderOptionsOptions gender = GetGenderOptionsByInput(UserInput.GetIntegerInput(Constant.genderOptions));
+            GenderOptions gender = GetGenderOptionsByInput(UserInput.GetIntegerInput(Constant.genderOptions));
             DateTime dob = GetDateTimeInput(UserInput.GetInputValue(Constant.dateOfBirth));
             string contactNumber = UserInput.GetInputValue(Constant.contactNumber);
             long aadharNumber = UserInput.GetLongInput(Constant.aadharNumber);
@@ -147,17 +150,17 @@ namespace BankAppDbFirstApproach.CLI
         private void UpdateAccountInterface()
         {
             string accountId = UserInput.GetInputValue(Constant.accountId);
-            Account userAccount = dbContext.Accounts.FirstOrDefault(acc => acc.accountId.Equals(accountId));
+            AccountViewModel userAccount = dbContext.Accounts.FirstOrDefault(acc => acc.accountId.Equals(accountId));
             if (userAccount != null)
             {
-                Customer customer = dbContext.Customers.FirstOrDefault(cust => cust.customerId.Equals(userAccount.customerId));
+                CustomerViewModel customer = dbContext.Customers.FirstOrDefault(cust => cust.customerId.Equals(userAccount.customerId));
                 if (customer != null)
                 {
                     UpdateAccountHandler(customer);
                     Console.WriteLine(Constant.updateConfirmation);
                     if (Console.ReadLine().EqualInvariant("y"))
                     {
-                        dbContext.SaveChanges();
+                        accountService.UpdateAccount(customer);
                         Console.WriteLine(Constant.updateSuccess);
                     }
                     else
@@ -167,39 +170,39 @@ namespace BankAppDbFirstApproach.CLI
             else
                 UserOutput.ShowMessage(Constant.accountNotFoundError);
         }
-        private void UpdateAccountHandler(Customer customer)
+        private void UpdateAccountHandler(CustomerViewModel customer)
         {
             Console.WriteLine(Constant.updateMenuHeader);
             Console.WriteLine(Constant.customerPropertiesMenu);
             switch (GetCustomerPropertyByInteger(Convert.ToInt32(Console.ReadLine())))
             {
                 case CustomerProperties.Name:
-                    Console.WriteLine($"[Existing : {customer.name}]");
-                    customer.name = GetName();
+                    Console.WriteLine($"[Existing : {customer.Name}]");
+                    customer.Name = GetName();
                     break;
                 case CustomerProperties.Age:
-                    Console.WriteLine($"[Existing : {customer.age}]");
-                    customer.age = GetAge();
+                    Console.WriteLine($"[Existing : {customer.Age}]");
+                    customer.Age = GetAge();
                     break;
                 case CustomerProperties.Dob:
-                    Console.WriteLine($"[Existing : {customer.dob}]");
-                    customer.dob = GetDateTimeInput(UserInput.GetInputValue("Date of Birth"));
+                    Console.WriteLine($"[Existing : {customer.Dob}]");
+                    customer.Dob = GetDateTimeInput(UserInput.GetInputValue("Date of Birth"));
                     break;
                 case CustomerProperties.AadharNumber:
-                    Console.WriteLine($"[Existing : {customer.aadharNumber}]");
-                    customer.aadharNumber = UserInput.GetLongInput("Aadhar number");
+                    Console.WriteLine($"[Existing : {customer.AadharNumber}]");
+                    customer.AadharNumber = UserInput.GetLongInput("Aadhar number");
                     break;
                 case CustomerProperties.PanNumber:
-                    Console.WriteLine($"[Existing : {customer.panNumber}]");
-                    customer.panNumber = UserInput.GetInputValue("Pan number");
+                    Console.WriteLine($"[Existing : {customer.PanNumber}]");
+                    customer.PanNumber = UserInput.GetInputValue("Pan number");
                     break;
                 case CustomerProperties.ContactNumber:
-                    Console.WriteLine($"[Existing : {customer.contactNumber}]");
-                    customer.contactNumber = UserInput.GetInputValue("Contact number");
+                    Console.WriteLine($"[Existing : {customer.ContactNumber}]");
+                    customer.ContactNumber = UserInput.GetInputValue("Contact number");
                     break;
                 case CustomerProperties.Address:
-                    Console.WriteLine($"[Existing : {customer.address}]");
-                    customer.address = UserInput.GetInputValue("Address");
+                    Console.WriteLine($"[Existing : {customer.Address}]");
+                    customer.Address = UserInput.GetInputValue("Address");
                     break;
                 default:
                     return;
@@ -375,7 +378,7 @@ namespace BankAppDbFirstApproach.CLI
             else
                 return BankEmployeeMenu.Logout;
         }
-        private GenderOptionsOptions GetGenderOptionsByInput(int v)
+        private GenderOptions GetGenderOptionsByInput(int v)
         {
             if (v == 1)
             {

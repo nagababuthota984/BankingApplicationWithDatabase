@@ -13,5 +13,6 @@ namespace BankAppDbFirstApproach.Services
         void TransferAmount(AccountViewModel senderAccount, BankViewModel senderBank, AccountViewModel receiverAccount, decimal amount, ModeOfTransferOptions mode);
         void ApplyTransferCharges(AccountViewModel senderAccount, BankViewModel senderBank, string receiverBankId, decimal amount, ModeOfTransferOptions mode, string currencyName);
         List<AccountViewModel> GetAllAccounts();
+        void UpdateAccount(CustomerViewModel customer);
     }
 }

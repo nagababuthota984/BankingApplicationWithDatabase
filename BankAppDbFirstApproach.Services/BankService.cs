@@ -52,7 +52,11 @@ namespace BankAppDbFirstApproach.Services
             SessionContext.Employee = emp;
             SessionContext.Bank = GetBankById(emp.BankId);
         }
-        public void CreateAndAddAccount(AccountViewModel newAccount, CustomerViewModel newCustomer, BankViewModel bank)
+        public void UpdateAccount(CustomerViewModel customer)
+        {
+            
+        }
+        public AccountViewModel CreateAndAddAccount(AccountViewModel newAccount, CustomerViewModel newCustomer, BankViewModel bank)
         {
             newAccount.BankId = bank.BankId;
             newAccount.AccountNumber = GenerateAccountNumber();
@@ -60,6 +64,8 @@ namespace BankAppDbFirstApproach.Services
             dbContext.Account.Add(mapper.Map<Account>(newAccount));
             dbContext.Customer.Add(mapper.Map<Customer>(newCustomer));
             dbContext.SaveChanges();
+            return mapper.Map<AccountViewModel>(dbContext.Account.FirstOrDefault(acc=>acc.AccountId.EqualInvariant(newAccount.AccountId)));
+            
         }
         public BankViewModel GetBankById(string bankId)
         {
@@ -95,6 +101,7 @@ namespace BankAppDbFirstApproach.Services
         public bool DeleteAccount(Account userAccount)
         {
             userAccount.Status = (int)AccountStatus.Closed;
+            dbContext.Account.Update(userAccount);
             dbContext.SaveChanges();
             return true;
         }
@@ -168,6 +175,11 @@ namespace BankAppDbFirstApproach.Services
                 accountNumber += r.Next(0, 9).ToString();
             }
             return accountNumber;
+        }
+
+        public CurrencyViewModel GetCurrencyByName(string currencyName)
+        {
+            return mapper.Map<CurrencyViewModel>(dbContext.Currency.ToList().FirstOrDefault(cr=>cr.Name.EqualInvariant(currencyName)));
         }
     }
 }

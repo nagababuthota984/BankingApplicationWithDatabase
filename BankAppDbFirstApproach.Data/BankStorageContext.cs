@@ -11,6 +11,7 @@ namespace BankAppDbFirstApproach.Data
         public BankStorageContext(DbContextOptions<BankStorageContext> options)
             : base(options)
         {
+           
         }
 
         public virtual DbSet<Account> Account { get; set; }

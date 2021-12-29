@@ -7,7 +7,7 @@ namespace BankAppDbFirstApproach.Services
     {
         BankViewModel CreateAndGetBank(string name, string branch, string ifsc);
         bool IsValidEmployee(string userName, string password);
-        void CreateAndAddAccount(AccountViewModel newAccount, CustomerViewModel customer, BankViewModel bank);
+        AccountViewModel CreateAndAddAccount(AccountViewModel newAccount, CustomerViewModel customer, BankViewModel bank);
         bool DeleteAccount(Account userAccount);
         bool AddNewCurrency(BankViewModel bank, string newName, decimal exchangeRate);
         bool ModifyServiceCharge(ModeOfTransferOptions mode, bool isSelfBankCharge, BankViewModel bank, decimal newValue);
@@ -17,5 +17,6 @@ namespace BankAppDbFirstApproach.Services
         List<TransactionViewModel> GetTransactionsByDate(DateTime date, string bankId);
         List<TransactionViewModel> GetTransactions(string bankId);
         BankViewModel GetBankById(string bankid);
+        CurrencyViewModel GetCurrencyByName(string currencyName);
     }
 }
